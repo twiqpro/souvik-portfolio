@@ -1,0 +1,36 @@
+.hero-scatter {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: calc(1 - max(0, (var(--dive, 0) - 0.82) * 5.5));
+}
+
+.hero-scatter__inner {
+  position: relative;
+  pointer-events: auto;
+}
+
+.hero-scatter__card-wrap {
+  position: relative;
+  z-index: 1;
+  will-change: opacity;
+}
+
+.hero-scatter__canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-scatter__canvas {
+    display: none;
+  }
+}

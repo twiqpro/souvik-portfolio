@@ -13,7 +13,7 @@
   z-index: 0;
   opacity: calc(1 - var(--section2, 0));
   pointer-events: none;
-  will-change: opacity;
+  contain: strict;
 }
 
 /* UI stays fixed — zoom illusion comes from WebGL camera only */
@@ -25,7 +25,6 @@
   transform: scale(calc(1 + var(--dive, 0) * 0.35));
   opacity: max(calc(1 - var(--dive, 0) * 0.85), var(--section2, 0));
   transition: none;
-  will-change: transform, opacity;
 }
 
 .ui a {

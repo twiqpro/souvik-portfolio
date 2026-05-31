@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { GLSLHills } from './components/GLSLHills';
 import { HeroHang } from './components/HeroHang';
 import { Section2 } from './sections/Section2';
@@ -11,30 +11,25 @@ const SCROLL_SMOOTHING = 0.11;
 function App() {
   const dive = useDiveScroll();
   const [section2Active, setSection2Active] = useState(false);
+  const section2ActiveRef = useRef(false);
 
-  useEffect(() => {
-    let frameId;
-    const tick = () => {
-      const { target, current } = dive.current;
-      dive.current.current += (target - current) * SCROLL_SMOOTHING;
+  const handleScrollFrame = useCallback(() => {
+    const { target, current } = dive.current;
+    dive.current.current += (target - current) * SCROLL_SMOOTHING;
 
-      const { dive: diveAmount, section2, section2Content } = mapScrollProgress(
-        dive.current.current,
-      );
+    const { dive: diveAmount, section2, section2Content } = mapScrollProgress(
+      dive.current.current,
+    );
 
-      document.documentElement.style.setProperty('--dive', String(diveAmount));
-      document.documentElement.style.setProperty('--section2', String(section2));
-      document.documentElement.style.setProperty('--section2-content', String(section2Content));
+    document.documentElement.style.setProperty('--dive', String(diveAmount));
+    document.documentElement.style.setProperty('--section2', String(section2));
+    document.documentElement.style.setProperty('--section2-content', String(section2Content));
 
-      setSection2Active((prev) => {
-        const next = section2 > 0.08;
-        return prev === next ? prev : next;
-      });
-
-      frameId = requestAnimationFrame(tick);
-    };
-    frameId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frameId);
+    const nextActive = section2 > 0.08;
+    if (nextActive !== section2ActiveRef.current) {
+      section2ActiveRef.current = nextActive;
+      setSection2Active(nextActive);
+    }
   }, [dive]);
 
   return (
@@ -42,6 +37,7 @@ function App() {
       <div className="app__hills">
         <GLSLHills
           diveRef={dive}
+          onFrame={handleScrollFrame}
           cameraZ={125}
           cameraZEnd={8}
           planeSize={256}

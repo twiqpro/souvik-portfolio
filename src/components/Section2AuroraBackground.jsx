@@ -54,7 +54,9 @@ function Section2AuroraBackground({ active = false }) {
 
     const animate = () => {
       frameId = requestAnimationFrame(animate);
-      if (activeRef.current && !reducedMotion) {
+      if (!activeRef.current) return;
+
+      if (!reducedMotion) {
         material.uniforms.iTime.value += TIME_STEP;
       }
       renderer.render(scene, camera);

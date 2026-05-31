@@ -1,245 +1,123 @@
-# Active Theory Portfolio — Design & Technical Breakdown
-> Reference document for recreating a similar experience for your own portfolio.
-> Source: [activetheory.net](https://activetheory.net)
+# Active Theory — Style Reference
+> Midnight Command Console. Deep, dark surfaces punctuated by precise, glowing UI elements.
 
----
+**Theme:** dark
 
-## 1. Studio Overview
+This design system evokes a 'digital void' aesthetic, combining deep, dark backgrounds with subtle luminous elements. The sparsity of color and reliance on grayscale with minimal violet accents creates an atmosphere of focused, almost melancholic, precision. Custom typography and specific rounded forms (500px pill buttons contrasting with 5px or 12px radii elsewhere) carve out a unique identity, suggesting advanced technology with a touch of crafted elegance.
 
-Active Theory is a Venice Beach–based creative digital production studio, founded in 2012. Their clients include Google, Nike, and Netflix. The portfolio site itself *is* their case study — every technical decision doubles as a demonstration of capability.
+## Colors
 
-**Core philosophy:** Don't describe what you do. Build an experience where visitors *feel* it.
+| Name | Value | Role |
+|------|-------|------|
+| Void Black | `#000000` | Primary background for pages and most components, creating a deep canvas for sparse UI elements. |
+| Ash Gray | `#4d4d4d` | Subtle borders and minor UI elements, providing minimal contrast against Void Black. |
+| Pure White | `#ffffff` | Primary text color, ensuring AAA contrast against dark backgrounds; also used for active states. |
+| Silver Mist | `#c6c6c6` | Secondary text color, like links or non-critical information, offering softer readability than Pure White. |
+| Subtle Violet | `#343755` | Rare background tint for interactive elements, lending a muted, almost invisible brand presence. |
+| Highlight Violet | `#9cA5FF` | Interactive elements, providing a soft glow that signals hover or active states without being overtly bright. Note: this color is only seen with transparency (33%) and is derived from `rgba(156, 165, 255, 0.333)` as the base color. |
 
----
+## Typography
 
-## 2. Visual Identity & Aesthetics
+### nbarchitekt — The primary typeface for UI elements, body text, and prominent links. Its custom nature gives the interface a distinct, technically precise feel at smaller sizes and a bold presence at larger weights. Weight 700 is reserved for key labels and headings, while weight 400 maintains legibility for body and interactive components.
+- **Substitute:** Montserrat
+- **Weights:** 400, 700
+- **Sizes:** 10px, 12px, 14px
+- **Line height:** 1.20, 1.50, 3.00
 
-### Color Palette
-| Role | Description |
-|---|---|
-| Background | Near-black (`#000000` / very dark navy) |
-| Primary accent | Electric neon — cyan, electric blue, hot pink/magenta |
-| Secondary accent | Amber/orange glow (used in tube trails) |
-| Text | Pure white, occasionally with slight glow/blur |
-| Environment light | Volumetric colored fog matching the neon accents |
+### Arial — Used for specific button labels, providing a standard, legible base that subtly contrasts with the custom nbarchitekt font.
+- **Substitute:** Arial
+- **Weights:** 400
+- **Sizes:** 13px
+- **Line height:** 1.20
 
-### Typography
-- **Display / Hero:** Alien-influenced, condensed sci-fi typefaces — feels custom or heavily modified
-- **Body / UI:** Minimal, monospace or geometric sans — ultra-light weight
-- **Style rules:** All-caps labels, tight tracking, very small point sizes for navigation; oversized for hero moments
+### Times — Employed for less critical text and general content, specifically where a traditional serif style is desired. This choice introduces a classic counterpoint to the otherwise modern, technical aesthetic. Its inclusion suggests intentionality for specific content blocks like legal text.
+- **Substitute:** Times New Roman
+- **Weights:** 400
+- **Sizes:** 16px
+- **Line height:** 1.20, 1.88
 
-### Aesthetic Direction
-- **Dark, immersive, neon-noir** — evokes cyberpunk installations and nightclub environments
-- Volumetric lighting: glowing tubes, particle halos, light bleed
-- No whitespace "minimalism" — the darkness itself is the breathing room
-- Everything exists in 3D space; the camera moves *through* the environment
+### Type Scale
 
----
+| Role | Size | Line Height | Letter Spacing |
+|------|------|-------------|----------------|
+| caption | 10px | 1.5 | — |
+| body-sm | 12px | 1.5 | — |
+| body | 14px | 1.5 | — |
 
-## 3. Layout & Navigation Structure
+## Spacing & Layout
 
-### Navigation
-- **Ultra-minimal pillbox nav** — just two links: Work and Contact
-- The pillbox physically *reacts to scroll velocity* — it stretches/squishes with momentum
-- No hamburger menus, no dropdowns, no sidebars
-- Navigation floats over the 3D environment, never blocks the experience
+**Density:** compact
 
-### Page Structure
-```
-[ Full-screen WebGL canvas (always full viewport) ]
-  └── Floating minimal nav (top center)
-  └── AI chat widget (bottom, floats around the portfolio)
-  └── Project cards (scroll-triggered, embedded in the 3D world)
-  └── Contact (one-liner at bottom)
-```
 
-### Scroll Behavior
-- Vertical scroll drives camera movement *inside* the 3D scene
-- Scroll velocity affects physics of UI elements (the pillbox nav)
-- No traditional page transitions — you're flying through a world, not loading pages
+### Border Radius
 
----
+- **max:** 500px
+- **min:** 5px
+- **cards:** 12px
+- **buttons:** 5px or 500px
 
-## 4. Key Interaction Patterns
+## Components
 
-### 1. Mouse/Touch Trails (Networked)
-- Colored glowing tubes spawn from your cursor position at top and bottom of the site
-- **Networked in real time** — you can see other visitors' mouse trails simultaneously
-- Creates a sense of shared social presence — subtle but eerie and memorable
+### Standard Ghost Button
+**Role:** Navigation and secondary actions
 
-### 2. AI Chat Navigation
-- A floating chat widget lets you navigate by natural language
-- Example prompts the studio mentions:
-  - *"Show me a fun project"*
-  - *"Have you done any crypto projects?"*
-  - *"Show me your best work for film clients"*
-- The chat "moves around" the portfolio — it physically animates to position itself contextually
+Minimalist button with rgba(255, 255, 255, 0.1) background, Pure White text, and a 1px top border of rgba(255, 255, 255, 0.6). Uses 5px border radius. Padding is 1px vertical, 6px horizontal. Font is nbarchitekt 400, 14px.
 
-### 3. Environmental Exploration
-- Multiple 3D scenes/environments toggle as you scroll (or by keyboard in earlier versions: Spacebar)
-- Environments inspired by real-world spaces — their LA and Amsterdam offices
-- Scene changes feel like teleporting between locations, not clicking through slides
+### Primary Pill Button
+**Role:** Key calls to action
 
-### 4. Hover States
-- Elements light up, shift, or subtly respond on hover
-- No static hover color changes — everything has a micro-physics feel
-- Cursor itself may transform on interactive elements
+Distinctive pill-shaped button with rgba(156, 165, 255, 0.333) background, black text, and a top border of rgba(255, 255, 255, 0.5). Features a 500px border radius. Padding is 4px vertical, 18px horizontal. Font is Arial 400, 13px.
 
----
+### Secondary Pill Button
+**Role:** Alternative actions or dismissals
 
-## 5. Technical Stack
+Pill-shaped button with rgba(0, 0, 0, 0.333) background (transparent black), black text, and a top border of rgba(255, 255, 255, 0.5). Features a 500px border radius. Padding is 4px vertical, 18px horizontal. Font is Arial 400, 13px.
 
-### Core Technology
-| Layer | Tool |
-|---|---|
-| Rendering engine | **WebGL** (custom, not Three.js) |
-| Internal framework | **Hydra** — Active Theory's proprietary JS framework |
-| Animation library | **GSAP** (GreenSock) for timeline control |
-| Shader language | Custom **GLSL** shaders for all visual effects |
-| Programming style | **Functional / state-based** JavaScript (not OOP) |
-| 3D asset compression | **Draco** mesh compression |
-| Media | Lazy-loaded video, compressed textures |
+### Cookie Consent Box
+**Role:** Informational overlay
 
-### Hydra Framework (Proprietary)
-- Built to survive the Flash-to-HTML5 transition; refined over 12+ years
-- Includes a **visual GUI** that lets designers build and tweak 3D scenes *without writing code*
-- Handles state management for all scene transitions and interaction states
-- Enables modular scene composition
+A dark, minimally bordered box with a 12px border radius. Contains body text in nbarchitekt 400, 12px, Pure White. Features two pill buttons for user interaction: Primary Pill Button and Secondary Pill Button, separated by horizontal internal spacing of 12px.
 
-### Performance
-- LCP (Largest Contentful Paint): ~1.3 seconds on desktop despite heavy shader work
-- Draco-compressed 3D meshes to reduce asset payload
-- Lazy-loaded video segments — scenes load progressively
-- Functional JS architecture keeps code modular and avoids memory leaks
+### Text Link - Active
+**Role:** Navigation and clickable text
 
----
+Pure White text with an underline, using nbarchitekt 400, 14px. On hover, it likely retains color and adds a subtle visual change not captured in static data.
 
-## 6. Visual Effects Breakdown
+### Text Link - Inactive/Secondary
+**Role:** Less prominent links or unvisited status
 
-### Particle Systems
-- Real-time particle simulations — hundreds to thousands of points in 3D space
-- Particles react to cursor proximity (magnetic/repel effects)
-- Used to create atmosphere — depth fog, star-fields, ambient life
+Silver Mist text, nbarchitekt 400, 14px. Used for links within long-form text or less critical navigation items to differentiate from active states or primary links.
 
-### GLSL Shaders
-- Custom shader programs run directly on GPU
-- Used for: glowing neon tubes, volumetric light halos, material surfaces, color grading
-- Post-processing effects: bloom, chromatic aberration, film grain, vignette
+## Do's and Don'ts
 
-### Neon Tube Trails
-- Bezier-curve geometry that follows cursor velocity
-- Color tied to each user's session (for the networked effect)
-- Physics-informed: tubes have tension, spring, and damping
+### Do
+- Prioritize Void Black (#000000) for all main backgrounds to maintain the dark, immersive aesthetic.
+- Use Pure White (#ffffff) for primary text and controls, ensuring high contrast (AAA) against dark backgrounds.
+- Apply nbarchitekt font at weight 400 for general UI text and 700 for headings, leveraging its unique character.
+- Utilize 500px border radius for key interactive buttons (like 'Accept Cookies') to create a distinct pill shape.
+- Employ the 5px border radius for `Standard Ghost Buttons` to subtly differentiate their interaction level from pill buttons.
+- Allow a top border as a subtle interactive indicator for buttons, using rgba(255, 255, 255, 0.6) or rgba(255, 255, 255, 0.5).
+- Maintain minimal padding variations (e.g., 1px vertical/6px horizontal and 4px vertical/18px horizontal) across button types for a controlled, compact feel.
 
-### Environment Lighting
-- Point lights with falloff placed inside 3D scenes
-- Emissive materials on neon signage and interactive elements
-- Ambient occlusion and shadow baking for grounding elements in space
+### Don't
+- Avoid using bright, saturated colors extensively; limit chromatic accents to Subtle Violet (#343755) and Highlight Violet (rgba(156, 165, 255, 0.333)).
+- Do not introduce new font families beyond nbarchitekt, Arial, and Times to maintain typographic consistency.
+- Refrain from using strong shadows or heavy gradients; focus on subtle luminescence and flat design elements.
+- Do not deviate from the specified border radii (5px, 12px, 500px); these define the component's perceived softness or sharpness.
+- Avoid large, uncontained images; instead, use abstract or technical visuals that blend into dark backgrounds.
+- Do not overuse Pure White; reserve it for essential text and active states to preserve its visual impact.
+- Do not use generic system default styling for interactive elements; custom button styles are critical to the brand identity.
 
----
+## Imagery
 
-## 7. Content Strategy
+The visual language is abstract and evocative, entirely eschewing traditional photography or literal illustrations. Instead, it features 3D rendered, luminous abstract forms and particle effects, like glimmers of light and transparent, refractive objects. Imagery is always 'contained' within the dark canvas of the background, appearing to emit its own light. The effect is decorative and atmospheric, rather than explanatory, contributing to a sense of mystery and advanced technology. Icons, though not extensively present, would likely be outlined and mono-colored to blend with the minimalist UI.
 
-### What's Shown
-- **Work / case studies** — project title, client, category, and a visual (video or rendered scene)
-- **About** (implicit — you understand who they are from the experience itself)
-- **Contact** — one minimal call-to-action
+## Layout
 
-### What's *Not* Shown
-- No team headshots
-- No lengthy bio paragraphs
-- No services list
-- No testimonials section
-- No pricing, no blog
+The site employs a full-bleed, dark canvas that extends to the edges of the viewport, creating an immersive, uncontained experience. The hero section is dominated by an abstract, luminous 3D graphic, centered vertically, with minimal UI elements (navigation, cookie consent) overlaid. Content appears to be presented sparsely and centrally, with elements spaced generously against the dark background. The navigation is a top-right, minimalist header, using subtle ghost buttons. The overall density is very low, prioritizing visual impact and a sense of 'space' as much as information delivery.
 
-**The principle:** Let the work speak entirely through experience, not explanation.
+## Similar Brands
 
-### Project Cards
-- Appear embedded in the 3D world, not as flat HTML overlays
-- Project titles in large display type, clients in small caps
-- Transitioning between projects feels like moving through space
-
----
-
-## 8. Audio (Optional / Subtle)
-- Ambient sound design in some versions — low drone, subtle UI click sounds
-- Audio is never forced; often tied to scene transitions
-- Adds to the "you are inside something" feeling
-
----
-
-## 9. Mobile Considerations
-- Touch replaces mouse: swipe drives the camera, tap triggers interactions
-- Tube trails follow touch position
-- Performance is carefully managed — lower particle counts on mobile
-- `viewport-fit=cover` and `user-scalable=no` ensure full-bleed immersion
-- `apple-mobile-web-app-capable: yes` — supports Add to Home Screen as a PWA-style experience
-
----
-
-## 10. Adapting This for Your Portfolio (PM / Product)
-
-You don't need to build a full WebGL engine. Here's how to translate the *principles* into a realistic personal portfolio:
-
-### Tier 1 — High Impact, Achievable (HTML/CSS/GSAP)
-- **Dark, full-bleed hero** with subtle animated gradient or noise texture background
-- **Custom cursor** that leaves a fading trail or morphs on hover
-- **Pill/capsule nav** that reacts to scroll (scale or opacity transition)
-- **Smooth scroll** with momentum using Lenis or locomotive-scroll
-- **Case study cards** with reveal animations on scroll (GSAP ScrollTrigger)
-- **Hover states** that feel physical — slight perspective tilt (CSS `perspective` + JS mouse tracking)
-
-### Tier 2 — Elevated (Add Three.js)
-- **Particle background** — floating dots in 3D space reacting to cursor
-- **3D text** or floating geometric shapes as hero decoration
-- **Scene transition** between sections using fade + camera move
-- **Post-processing** — bloom and chromatic aberration via Three.js EffectComposer
-
-### Tier 3 — Full Immersion (Custom WebGL / Shaders)
-- Custom GLSL shader backgrounds (noise, displacement, fluid sims)
-- Networked real-time cursor sharing (Socket.io)
-- Full 3D environment with interactive navigation
-- AI chat for portfolio navigation (Claude/OpenAI API)
-
-### Key UX Principles to Steal Regardless of Tech Level
-1. **Minimal navigation** — max 2–3 links, floating, reacts to scroll
-2. **Black canvas** — darkness is your friend; it makes everything glow
-3. **Motion is content** — every transition should feel considered, never instant
-4. **No clutter** — one thing on screen at a time, let the work breathe
-5. **Interaction = discovery** — don't explain features, let users find them
-6. **Performance obsession** — compress everything, lazy load, measure LCP
-
----
-
-## 11. Recommended Tech Stack for Your Build
-
-```
-Core:         HTML5 + CSS3 + Vanilla JS  (or Next.js for routing)
-Animation:    GSAP + ScrollTrigger
-3D (opt):     Three.js
-Smooth scroll: Lenis
-Fonts:        Google Fonts or Fontshare — pick something distinctive
-Shaders:      glslify (if going custom GLSL)
-Deployment:   Vercel or Netlify
-```
-
----
-
-## 12. Reference Links & Inspiration
-
-| Resource | URL |
-|---|---|
-| Active Theory (live) | https://activetheory.net |
-| CommArts interview | https://www.commarts.com/webpicks/active-theory-2 |
-| WebGPU community writeup | https://www.webgpu.com/showcase/active-theory-portfolio/ |
-| GSAP (animation) | https://greensock.com/gsap/ |
-| Three.js | https://threejs.org |
-| Lenis (smooth scroll) | https://lenis.darkroom.engineering |
-| Awwwards inspiration | https://www.awwwards.com |
-| Codrops tutorials | https://tympanus.net/codrops |
-| Shader examples | https://shadertoy.com |
-| Font inspiration | https://fontshare.com |
-
----
-
-*Document compiled: May 2026. Based on public analysis of activetheory.net and published interviews with Active Theory co-founders Michael Modena and Andy Thelander.*
+- **Awwwards-winning portfolio sites** — Shares the dark, immersive background, custom typography, subtle interactive elements, and emphasis on visual experience over dense information.
+- **Google Arts & Culture** — Uses deep, dark backgrounds to showcase visual content and interactive elements, often with subtle glow effects.
+- **Obscura Digital** — Similar focus on creative digital experiences, often translating into interfaces that are more artistic and atmospheric than purely functional, with dark palettes and experimental typography.

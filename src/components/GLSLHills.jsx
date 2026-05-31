@@ -9,13 +9,16 @@ const GLSLHills = ({
   planeSize = 256,
   speed = 0.5,
   diveRef = null,
+  onFrame = null,
 }) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const frameRef = useRef(null);
   const rendererRef = useRef(null);
   const diveRefStable = useRef(diveRef);
+  const onFrameRef = useRef(onFrame);
   diveRefStable.current = diveRef;
+  onFrameRef.current = onFrame;
 
   useEffect(() => {
     class Plane {
@@ -152,7 +155,7 @@ const GLSLHills = ({
               }
             `,
             transparent: true,
-          })
+          }),
         );
       }
 
@@ -186,6 +189,7 @@ const GLSLHills = ({
     const lookAt = new THREE.Vector3();
 
     const render = () => {
+      onFrameRef.current?.();
       plane.render(clock.getDelta());
 
       const dive = diveRefStable.current;
