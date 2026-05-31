@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="BITS Pilani">
+  <circle cx="24" cy="24" r="22" fill="#fff" stroke="#2B2B88" stroke-width="2"/>
+  <circle cx="24" cy="24" r="16" fill="none" stroke="#5CCAE8" stroke-width="1.5"/>
+  <circle cx="24" cy="24" r="10" fill="none" stroke="#CF2027" stroke-width="1.2"/>
+  <path fill="#B78A2D" d="M24 10 L26 18 L24 16 L22 18 Z"/>
+  <circle cx="24" cy="26" r="3" fill="#2B2B88"/>
+</svg>

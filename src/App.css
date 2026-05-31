@@ -1,0 +1,125 @@
+.app {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--void-black);
+}
+
+.app__hills {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: calc(1 - var(--section2, 0));
+  pointer-events: none;
+  will-change: opacity;
+}
+
+/* UI stays fixed — zoom illusion comes from WebGL camera only */
+.ui {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  transform: scale(calc(1 + var(--dive, 0) * 0.35));
+  opacity: max(calc(1 - var(--dive, 0) * 0.85), var(--section2, 0));
+  transition: none;
+  will-change: transform, opacity;
+}
+
+.ui a {
+  pointer-events: auto;
+}
+
+.nav {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-ghost {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--pure-white);
+  padding: 1px 6px;
+  border-radius: 5px;
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  transition: background 0.25s ease;
+}
+
+.btn-ghost:hover {
+  background: var(--highlight-violet);
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--silver-mist);
+  opacity: max(
+    calc((1 - var(--dive, 0) * 4) * (1 - var(--section2, 0))),
+    calc(var(--section2, 0) * 0.85)
+  );
+  pointer-events: none;
+  animation: hint-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes hint-pulse {
+  0%,
+  100% {
+    opacity: max(
+      calc((1 - var(--dive, 0) * 4) * (1 - var(--section2, 0)) * 0.6),
+      calc(var(--section2, 0) * 0.6)
+    );
+  }
+  50% {
+    opacity: max(
+      calc((1 - var(--dive, 0) * 4) * (1 - var(--section2, 0))),
+      calc(var(--section2, 0) * 0.85)
+    );
+  }
+}
+
+/* Tunnel edge darkening as you dive in */
+.dive-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: calc(1 - var(--section2, 0) * 0.9);
+  background: radial-gradient(
+    circle at 50% 50%,
+    transparent 0%,
+    transparent calc(35% - var(--dive, 0) * 25%),
+    rgba(0, 0, 0, calc(0.15 + var(--dive, 0) * 0.75)) 100%
+  );
+}
+
+@media (max-width: 640px) {
+  .nav {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .scroll-hint {
+    bottom: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hint {
+    animation: none;
+  }
+}
