@@ -46,21 +46,12 @@ function App() {
       </div>
 
       <div className="ui">
-        <header className="nav">
-          <a href="#section-2" className="btn-ghost">
-            Work
-          </a>
-          <a href="#contact" className="btn-ghost">
-            Contact
-          </a>
-        </header>
-
         <p className="scroll-hint" aria-live="polite">
           {section2Active ? 'Scroll up to return' : 'Scroll to enter'}
         </p>
       </div>
 
-      <HeroHang />
+      <HeroHang diveRef={dive} />
 
       <Section2 active={section2Active} />
 

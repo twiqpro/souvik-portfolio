@@ -1,17 +1,12 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { toCanvas } from 'html-to-image';
+import { getCameraDiveState, getCardDissolveProgress, getCardDriftProgress } from '../utils/cameraDive';
 import { HeroCard } from './HeroCard';
 import './HeroCardScatter.css';
 
 const DUST_STEP = 3;
 const CANVAS_PAD = 220;
 const DRIFT = 200;
-const DISSOLVE_START = 0.015;
-const DISSOLVE_END = 0.1;
-
-function getDive() {
-  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dive')) || 0;
-}
 
 function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
@@ -57,7 +52,8 @@ function buildDustFromSnapshot(sourceCanvas, width, height) {
   return particles;
 }
 
-function HeroCardScatter() {
+function HeroCardScatter({ diveRef = null }) {
+  const innerRef = useRef(null);
   const cardRef = useRef(null);
   const canvasRef = useRef(null);
   const particlesRef = useRef(null);
@@ -142,16 +138,26 @@ function HeroCardScatter() {
 
   useEffect(() => {
     const tick = () => {
-      const dive = getDive();
+      const scrollProgress = diveRef?.current?.current ?? 0;
+      const { ease, cardZoom } = getCameraDiveState(scrollProgress);
+      const dissolve = getCardDissolveProgress(ease);
+      const drift = getCardDriftProgress(ease);
+      const inner = innerRef.current;
       const canvas = canvasRef.current;
       const card = cardRef.current;
       const data = particlesRef.current;
 
+      if (inner && !reducedMotionRef.current) {
+        const translateZ = (cardZoom - 1) * 96;
+        inner.style.transform = `translateZ(${translateZ}px) scale(${cardZoom})`;
+      } else if (inner) {
+        inner.style.transform = '';
+      }
+
       if (card) {
         if (reducedMotionRef.current) {
-          card.style.opacity = String(Math.max(0, 1 - dive * 1.4));
+          card.style.opacity = String(Math.max(0, 1 - ease * 1.15));
         } else {
-          const dissolve = clamp((dive - DISSOLVE_START) / (DISSOLVE_END - DISSOLVE_START), 0, 1);
           const cardOpacity = 1 - dissolve;
           card.style.opacity = String(cardOpacity);
           card.style.visibility = cardOpacity <= 0.01 ? 'hidden' : 'visible';
@@ -168,26 +174,20 @@ function HeroCardScatter() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, data.width, data.height);
 
-      if (dive > DISSOLVE_START) {
+      if (dissolve > 0 || drift > 0) {
         for (const p of data.list) {
-          const local = Math.max(0, dive - p.delay * 0.08);
-          const dissolve = clamp(
-            (local - DISSOLVE_START) / (DISSOLVE_END - DISSOLVE_START),
-            0,
-            1,
-          );
-          const drift = clamp((local - DISSOLVE_END) / (1 - DISSOLVE_END), 0, 1);
+          const particleDissolve = clamp(dissolve - p.delay * 0.12, 0, 1);
           const driftEased = drift * drift;
 
-          if (dissolve <= 0 && drift <= 0) continue;
+          if (particleDissolve <= 0 && drift <= 0) continue;
 
-          const wobble = Math.sin(dive * p.wobbleSpeed + p.wobble) * driftEased * 6;
+          const wobble = Math.sin(ease * p.wobbleSpeed * 4 + p.wobble) * driftEased * 6;
           const x = p.ox + p.vx * DRIFT * driftEased + wobble;
           const y = p.oy + p.vy * DRIFT * driftEased + driftEased * driftEased * 18;
 
           const alpha =
             drift <= 0
-              ? dissolve * p.baseAlpha
+              ? particleDissolve * p.baseAlpha
               : p.baseAlpha * (1 - driftEased * 0.97);
 
           if (alpha <= 0.006) continue;
@@ -203,11 +203,11 @@ function HeroCardScatter() {
 
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, []);
+  }, [diveRef]);
 
   return (
     <div className="hero-scatter">
-      <div className="hero-scatter__inner">
+      <div className="hero-scatter__inner" ref={innerRef}>
         <div className="hero-scatter__card-wrap" ref={cardRef}>
           <HeroCard />
         </div>

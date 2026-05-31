@@ -1,7 +1,7 @@
 import { HeroCardScatter } from './HeroCardScatter';
 
-function HeroHang() {
-  return <HeroCardScatter />;
+function HeroHang({ diveRef }) {
+  return <HeroCardScatter diveRef={diveRef} />;
 }
 
 export { HeroHang };

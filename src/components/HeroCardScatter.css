@@ -6,12 +6,15 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  opacity: calc(1 - max(0, (var(--dive, 0) - 0.82) * 5.5));
+  perspective: 1200px;
+  opacity: calc(1 - max(0, (var(--dive, 0) - 0.9) * 8));
 }
 
 .hero-scatter__inner {
   position: relative;
   pointer-events: auto;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .hero-scatter__card-wrap {

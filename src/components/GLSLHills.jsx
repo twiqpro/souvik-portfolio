@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { getCameraDiveState } from '../utils/cameraDive';
 
 const GLSLHills = ({
   width = '100vw',
@@ -194,13 +195,12 @@ const GLSLHills = ({
 
       const dive = diveRefStable.current;
       if (dive?.current) {
-        const t = Math.min(1, dive.current.current / 0.58);
-        const ease = t * t * (3 - 2 * t);
+        const { ease, cameraY, cameraFov } = getCameraDiveState(dive.current.current);
         camera.position.z = THREE.MathUtils.lerp(cameraZ, cameraZEnd, ease);
-        camera.position.y = THREE.MathUtils.lerp(16, 10, ease);
+        camera.position.y = cameraY;
         lookAt.copy(lookAtStart).lerp(lookAtEnd, ease);
         camera.lookAt(lookAt);
-        camera.fov = THREE.MathUtils.lerp(45, 58, ease);
+        camera.fov = cameraFov;
         camera.updateProjectionMatrix();
       }
 
