@@ -139,7 +139,7 @@ function HeroCardScatter({ diveRef = null }) {
   useEffect(() => {
     const tick = () => {
       const scrollProgress = diveRef?.current?.current ?? 0;
-      const { ease, cardZoom } = getCameraDiveState(scrollProgress);
+      const { t: dive, ease, cardZoom } = getCameraDiveState(scrollProgress);
       const dissolve = getCardDissolveProgress(ease);
       const drift = getCardDriftProgress(ease);
       const inner = innerRef.current;
@@ -148,8 +148,7 @@ function HeroCardScatter({ diveRef = null }) {
       const data = particlesRef.current;
 
       if (inner && !reducedMotionRef.current) {
-        const translateZ = (cardZoom - 1) * 96;
-        inner.style.transform = `translateZ(${translateZ}px) scale(${cardZoom})`;
+        inner.style.transform = `translateY(${-dive * 10}vh) scale(${cardZoom})`;
       } else if (inner) {
         inner.style.transform = '';
       }

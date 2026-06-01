@@ -9,7 +9,7 @@ export function mapScrollProgress(progress) {
 
   const dive = clamp01(p / 0.58);
   const section2 = clamp01((p - 0.28) / 0.72);
-  const section2Content = clamp01((p - 0.38) / 0.62);
+  const section2Content = clamp01((p - 0.32) / 0.58);
 
   return { dive, section2, section2Content };
 }

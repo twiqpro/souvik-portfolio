@@ -1,20 +1,31 @@
 .hero-scatter {
   position: fixed;
   inset: 0;
-  z-index: 2;
+  z-index: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
+  padding-bottom: clamp(5rem, 11vh, 8.5rem);
   pointer-events: none;
-  perspective: 1200px;
   opacity: calc(1 - max(0, (var(--dive, 0) - 0.9) * 8));
 }
 
 .hero-scatter__inner {
   position: relative;
   pointer-events: auto;
-  transform-style: preserve-3d;
   will-change: transform;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(62% - var(--dive, 0) * 14%),
+    transparent calc(82% - var(--dive, 0) * 18%)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(62% - var(--dive, 0) * 14%),
+    transparent calc(82% - var(--dive, 0) * 18%)
+  );
 }
 
 .hero-scatter__card-wrap {
@@ -32,8 +43,19 @@
   pointer-events: none;
 }
 
+@media (max-width: 640px) {
+  .hero-scatter {
+    padding-bottom: clamp(3.5rem, 8vh, 6rem);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-scatter__canvas {
     display: none;
+  }
+
+  .hero-scatter__inner {
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 }

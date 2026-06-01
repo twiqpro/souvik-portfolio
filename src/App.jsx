@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { GLSLHills } from './components/GLSLHills';
 import { HeroHang } from './components/HeroHang';
 import { Section2 } from './sections/Section2';
@@ -34,6 +34,8 @@ function App() {
 
   return (
     <div className="app">
+      <HeroHang diveRef={dive} />
+
       <div className="app__hills">
         <GLSLHills
           diveRef={dive}
@@ -50,8 +52,6 @@ function App() {
           {section2Active ? 'Scroll up to return' : 'Scroll to enter'}
         </p>
       </div>
-
-      <HeroHang diveRef={dive} />
 
       <Section2 active={section2Active} />
 
