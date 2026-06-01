@@ -91,7 +91,6 @@
   font-size: clamp(1.1rem, 3.2vw, 1.5rem);
   font-weight: 400;
   letter-spacing: 0.06em;
-  text-transform: lowercase;
   color: var(--silver-mist);
 }
 

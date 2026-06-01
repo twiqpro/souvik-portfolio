@@ -18,10 +18,10 @@ function Section2({ active = false }) {
       <div className="section-2__overlay">
         <h2 className="section-2__statement">
           <span className="section-2__statement-lead">
-            <span className="section-2__statement-line">I am an AI native</span>
-            <span className="section-2__statement-line">product designer</span>
+            <span className="section-2__statement-line">Transforming Complexity into</span>
+            <span className="section-2__statement-line">Delightful User Experiences</span>
           </span>
-          <span className="section-2__statement-since">since 2022</span>
+          <span className="section-2__statement-since">Since 2020</span>
         </h2>
       </div>
     </section>
