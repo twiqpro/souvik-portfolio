@@ -1,7 +1,9 @@
 import { AmbientLoopVideo } from '../components/AmbientLoopVideo';
 import './Section5.css';
 
-const BACKGROUND_VIDEO_SRC = '/Background.mp4';
+/** Cloudinary delivery — cloud_name: dljyiadup, public_id: Background_svuv4d */
+const BACKGROUND_VIDEO_SRC =
+  'https://res.cloudinary.com/dljyiadup/video/upload/Background_svuv4d.mp4';
 
 /**
  * Section 5 — looping Background.mp4 (normal playback) + overlay.
