@@ -1,6 +1,7 @@
+import { mapScrollProgress } from './scrollProgress';
+
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
 
-export const HERO_DIVE_RANGE = 0.58;
 export const CAMERA_Z_START = 125;
 export const CAMERA_Z_END = 8;
 export const CAMERA_Y_START = 16;
@@ -17,14 +18,9 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
-/** Linear hero-dive channel (0→1 over first ~58% of scroll). */
-export function getHeroDiveT(scrollProgress) {
-  return clamp01(scrollProgress / HERO_DIVE_RANGE);
-}
-
-/** Camera + card zoom state — shared by hills background and hero card. */
+/** Camera + card zoom — uses same dive channel as CSS `--dive`. */
 export function getCameraDiveState(scrollProgress) {
-  const t = getHeroDiveT(scrollProgress);
+  const { dive: t } = mapScrollProgress(scrollProgress);
   const ease = smoothstep(t);
   const cameraZ = lerp(CAMERA_Z_START, CAMERA_Z_END, ease);
   const cameraY = lerp(CAMERA_Y_START, CAMERA_Y_END, ease);

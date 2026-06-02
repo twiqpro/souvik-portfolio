@@ -20,6 +20,11 @@ html {
   --dive: 0;
   --section2: 0;
   --section2-content: 0;
+  --section3: 0;
+  --section3-content: 0;
+  --section4: 0;
+  --section4-content: 0;
+  --tunnel-progress: 0;
 }
 
 html,

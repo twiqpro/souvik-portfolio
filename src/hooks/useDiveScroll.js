@@ -37,11 +37,11 @@ export function useDiveScroll({ sensitivity = 0.0028, max = 1 } = {}) {
     const onKeyDown = (e) => {
       if (e.key === 'ArrowDown' || e.key === 'PageDown') {
         e.preventDefault();
-        dive.current.target = clamp(dive.current.target + 0.06);
+        dive.current.target = clamp(dive.current.target + 0.028);
       }
       if (e.key === 'ArrowUp' || e.key === 'PageUp') {
         e.preventDefault();
-        dive.current.target = clamp(dive.current.target - 0.06);
+        dive.current.target = clamp(dive.current.target - 0.028);
       }
     };
 

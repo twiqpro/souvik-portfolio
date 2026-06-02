@@ -191,20 +191,30 @@ const GLSLHills = ({
 
     const render = () => {
       onFrameRef.current?.();
-      plane.render(clock.getDelta());
 
       const dive = diveRefStable.current;
-      if (dive?.current) {
-        const { ease, cameraY, cameraFov } = getCameraDiveState(dive.current.current);
-        camera.position.z = THREE.MathUtils.lerp(cameraZ, cameraZEnd, ease);
-        camera.position.y = cameraY;
-        lookAt.copy(lookAtStart).lerp(lookAtEnd, ease);
-        camera.lookAt(lookAt);
-        camera.fov = cameraFov;
-        camera.updateProjectionMatrix();
-      }
+      const mapped = dive?.current?.mapped;
+      const sectionsVisible = Math.max(
+        mapped?.section2 ?? 0,
+        mapped?.section3 ?? 0,
+        mapped?.section4 ?? 0,
+      );
 
-      renderer.render(scene, camera);
+      if (sectionsVisible < 0.12) {
+        plane.render(clock.getDelta());
+
+        if (dive?.current) {
+          const { ease, cameraY, cameraFov } = getCameraDiveState(dive.current.current);
+          camera.position.z = THREE.MathUtils.lerp(cameraZ, cameraZEnd, ease);
+          camera.position.y = cameraY;
+          lookAt.copy(lookAtStart).lerp(lookAtEnd, ease);
+          camera.lookAt(lookAt);
+          camera.fov = cameraFov;
+          camera.updateProjectionMatrix();
+        }
+
+        renderer.render(scene, camera);
+      }
     };
 
     const renderLoop = () => {
