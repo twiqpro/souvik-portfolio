@@ -1,0 +1,12 @@
+.ambient-loop-video__el {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-loop-video__el {
+    display: none;
+  }
+}

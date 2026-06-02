@@ -28,7 +28,7 @@ function Section3({ active = false, diveRef = null }) {
 
       <div className="section-3__overlay">
         <h2 className="section-3__statement">
-          <span className="section-3__statement-line">Selected Work</span>
+          <span className="section-3__statement-line">Building in the void</span>
           <span className="section-3__statement-sub">
             Product design · AI-native flows · Systems
           </span>

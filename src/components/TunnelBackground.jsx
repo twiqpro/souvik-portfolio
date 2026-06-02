@@ -14,6 +14,11 @@ const SCROLL_KEYS = [
   'section4',
   'section4Content',
   'section4Phase',
+  'section5',
+  'section5Content',
+  'section5Phase',
+  'forwardProgress',
+  's45Dive',
   'tunnelProgress',
 ];
 

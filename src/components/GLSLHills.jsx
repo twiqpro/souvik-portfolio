@@ -198,6 +198,7 @@ const GLSLHills = ({
         mapped?.section2 ?? 0,
         mapped?.section3 ?? 0,
         mapped?.section4 ?? 0,
+        mapped?.section5 ?? 0,
       );
 
       if (sectionsVisible < 0.12) {

@@ -1,0 +1,115 @@
+.section-5 {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.section-5--active {
+  pointer-events: auto;
+}
+
+.section-5__bg {
+  position: absolute;
+  inset: 0;
+  opacity: var(--section5, 0);
+  overflow: hidden;
+  background: var(--void-black);
+  will-change: opacity;
+}
+
+.section-5__bg-zoom {
+  width: 100%;
+  height: 100%;
+  transform: scale(calc(1.38 - var(--s45-dive, 0) * 0.38));
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.section-5__video.ambient-loop-video__el,
+.section-5__bg .ambient-loop-video__el {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.section-5__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: calc(var(--section5, 0) * 0.45);
+  background:
+    radial-gradient(ellipse 75% 55% at 50% 38%, transparent 0%, rgba(0, 0, 0, 0.4) 100%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, transparent 40%, transparent 88%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+.section-5__overlay {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100dvh;
+  padding: clamp(4rem, 11vh, 7rem) 1.5rem 2rem;
+  text-align: center;
+  color: var(--pure-white);
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.9), 0 0 48px rgba(0, 0, 0, 0.65);
+  opacity: var(--section5, 0);
+  transform: scale(calc(1.12 - var(--s45-dive, 0) * 0.12));
+  transform-origin: 50% 48%;
+  will-change: opacity, transform;
+}
+
+.section-5__statement {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65em;
+  margin: 0;
+  max-width: 92vw;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  opacity: 1;
+  transform: translateY(calc((1 - var(--section5-content, 0)) * 8px));
+  will-change: transform;
+}
+
+.section-5__statement-line {
+  display: block;
+  font-size: clamp(1.75rem, 5.8vw, 2.85rem);
+  background: linear-gradient(
+    105deg,
+    var(--pure-white) 0%,
+    var(--silver-mist) 70%,
+    rgba(198, 198, 198, 0.9) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.section-5__statement-sub {
+  display: block;
+  font-size: clamp(0.9rem, 2.6vw, 1.1rem);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--silver-mist);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-5__bg-zoom,
+  .section-5__overlay {
+    transform: none;
+  }
+
+  .section-5__statement {
+    transform: none;
+  }
+}
