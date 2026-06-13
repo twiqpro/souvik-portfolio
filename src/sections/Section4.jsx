@@ -1,4 +1,5 @@
 import { Starfield } from '../components/Starfield';
+import { ExpandableGallery } from '../components/ExpandableGallery';
 import './Section4.css';
 
 /**
@@ -26,10 +27,7 @@ function Section4({ active = false }) {
         </header>
 
         <div className="section-4__cases" aria-label="Case study list">
-          {/* Add case study cards here */}
-          <p className="section-4__cases-placeholder">
-            Case studies — scroll to explore
-          </p>
+          <ExpandableGallery />
         </div>
       </div>
     </section>

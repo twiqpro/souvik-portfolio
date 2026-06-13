@@ -17,14 +17,14 @@
   -webkit-mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 calc(62% - var(--dive, 0) * 14%),
-    transparent calc(82% - var(--dive, 0) * 18%)
+    #000 calc(88% - var(--dive, 0) * 10%),
+    transparent calc(100% - var(--dive, 0) * 6%)
   );
   mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 calc(62% - var(--dive, 0) * 14%),
-    transparent calc(82% - var(--dive, 0) * 18%)
+    #000 calc(88% - var(--dive, 0) * 10%),
+    transparent calc(100% - var(--dive, 0) * 6%)
   );
 }
 

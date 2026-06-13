@@ -8,7 +8,7 @@ export const HERO_DIVE_END_P = 0.48;
 
 /**
  * Map unified scroll progress to layered crossfade channels.
- * Hero → S2/S3 tunnel → S4 starfield (long) → S5 video with Z dive handoff.
+ * Hero → S2/S3 tunnel → S4 starfield (final section).
  */
 export function mapScrollProgress(progress) {
   const p = clamp01(progress / SCROLL_RANGE);
@@ -24,12 +24,8 @@ export function mapScrollProgress(progress) {
   const section3Out = 1 - clamp01((p - 0.68) / 0.16);
   const section3 = Math.min(section3In, section3Out);
 
-  /** Section 4 — long band for case studies (starts after S3 handoff). */
-  const section4In = clamp01((p - 0.58) / 0.12);
-  const section4Out = 1 - clamp01((p - 0.86) / 0.1);
-  const section4 = Math.min(section4In, section4Out);
-
-  const section5 = clamp01((p - 0.8) / 0.16);
+  /** Section 4 — final section; stays visible once entered. */
+  const section4 = clamp01((p - 0.58) / 0.12);
 
   /** Tunnel scrub through S2 + full S3 fade (incl. S3→S4 crossfade). */
   const tunnelProgress = clamp01((p - 0.26) / 0.5);
@@ -45,12 +41,6 @@ export function mapScrollProgress(progress) {
   const section4Phase = clamp01((p - 0.58) / 0.36);
   const section4Content = clamp01((section4Phase - 0.02) / 0.014);
 
-  const section5Phase = clamp01((p - 0.8) / 0.18);
-  const section5Content = clamp01((section5Phase - 0.02) / 0.014);
-
-  /** 0→1 during S4→S5 overlap — drives Z zoom (S4 flies in, S5 settles). */
-  const s45Dive = clamp01((p - 0.78) / 0.14);
-
   return {
     dive,
     section2,
@@ -62,11 +52,7 @@ export function mapScrollProgress(progress) {
     section4,
     section4Content,
     section4Phase,
-    section5,
-    section5Content,
-    section5Phase,
     tunnelProgress,
     forwardProgress,
-    s45Dive,
   };
 }
