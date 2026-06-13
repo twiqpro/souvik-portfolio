@@ -100,7 +100,14 @@ function ArrowRightIcon() {
   );
 }
 
-function ExpandableGallery() {
+const entranceTransition = {
+  type: 'spring',
+  stiffness: 110,
+  damping: 22,
+  mass: 0.95,
+};
+
+function ExpandableGallery({ active = false }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const layoutGroupId = useId();
   const containerRef = useRef(null);
@@ -141,8 +148,18 @@ function ExpandableGallery() {
             className={`expandable-gallery__stage${isExpanded ? ' expandable-gallery__stage--expanded' : ''}`}
             transition={transition}
           >
-            <div
+            <motion.div
               className={`expandable-gallery__cards${isExpanded ? ' expandable-gallery__cards--expanded' : ''}`}
+              initial={false}
+              animate={
+                isExpanded
+                  ? { y: 0, opacity: 1 }
+                  : {
+                      y: active ? 0 : 180,
+                      opacity: active ? 1 : 0,
+                    }
+              }
+              transition={entranceTransition}
             >
               {CASE_STUDIES.map((photo, index) => {
                 const isPrimary = index < 3;
@@ -153,16 +170,19 @@ function ExpandableGallery() {
                     key={`card-${photo.id}`}
                     layoutId={`card-container-${photo.id}`}
                     layout
-                    initial={{ opacity: 0, scale: 0.9 }}
+                    initial={{ opacity: 0, scale: 0.88, y: 120 }}
                     animate={{
-                      opacity: 1,
-                      scale: 1,
+                      opacity: active ? 1 : 0,
+                      scale: active ? 1 : 0.88,
                       rotate: !isExpanded ? photo.rotation || 0 : 0,
                       x: !isExpanded ? photo.x || 0 : 0,
-                      y: !isExpanded ? photo.y || 0 : 0,
+                      y: !isExpanded ? (active ? photo.y || 0 : (photo.y || 0) + 80) : 0,
                       zIndex: !isExpanded ? photo.zIndex || index : 10,
                     }}
-                    transition={transition}
+                    transition={{
+                      ...transition,
+                      delay: active && !isExpanded ? 0.12 + index * 0.1 : 0,
+                    }}
                     whileHover={
                       !isExpanded
                         ? {
@@ -207,14 +227,19 @@ function ExpandableGallery() {
                   </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
 
             <AnimatePresence>
               {!isExpanded && (
                 <motion.div
                   key="stack-content"
-                  initial={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  initial={{ opacity: 0, y: 48 }}
+                  animate={{
+                    opacity: active ? 1 : 0,
+                    y: active ? 0 : 48,
+                  }}
+                  exit={{ opacity: 0, y: 24 }}
+                  transition={{ ...entranceTransition, delay: active ? 0.45 : 0 }}
                   className="expandable-gallery__copy"
                 >
                   <div className="expandable-gallery__cta-wrap">

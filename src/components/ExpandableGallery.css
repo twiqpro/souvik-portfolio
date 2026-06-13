@@ -82,6 +82,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 2rem;
+  will-change: transform, opacity;
 }
 
 .expandable-gallery__cards--expanded {
@@ -203,6 +204,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .expandable-gallery__cards {
+    will-change: auto;
+  }
+
   .expandable-gallery__cta,
   .expandable-gallery__cta svg {
     transition: none;

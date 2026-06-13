@@ -27,7 +27,7 @@ function Section4({ active = false }) {
         </header>
 
         <div className="section-4__cases" aria-label="Case study list">
-          <ExpandableGallery />
+          <ExpandableGallery active={active} />
         </div>
       </div>
     </section>
