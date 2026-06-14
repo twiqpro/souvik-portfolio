@@ -14,12 +14,12 @@ const CAMERA_FOV = 68;
 
 const FADE_SETTINGS = {
   fadeIn: { start: 0.05, end: 0.22 },
-  fadeOut: { start: 0.58, end: 0.82 },
+  fadeOut: { start: 0.58, end: 0.74 },
 };
 
 const BLUR_SETTINGS = {
   blurIn: { start: 0.0, end: 0.12 },
-  blurOut: { start: 0.58, end: 0.82 },
+  blurOut: { start: 0.58, end: 0.74 },
   maxBlur: 5.0,
 };
 

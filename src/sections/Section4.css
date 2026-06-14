@@ -21,18 +21,6 @@
   pointer-events: none;
 }
 
-.section-4__scrim {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: calc(var(--section4, 0) * 0.35);
-  background: radial-gradient(
-    ellipse 70% 50% at 50% 45%,
-    transparent 0%,
-    rgba(0, 0, 0, 0.45) 100%
-  );
-}
-
 .section-4__overlay {
   position: relative;
   z-index: 1;
@@ -82,19 +70,9 @@
   color: transparent;
 }
 
-.section-4__statement-sub {
-  display: block;
-  font-size: clamp(0.9rem, 2.6vw, 1.1rem);
-  font-weight: 400;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--silver-mist);
-}
-
 .section-4__cases {
   width: min(96vw, 72rem);
   margin-top: clamp(1.5rem, 4vh, 2.5rem);
-  padding-bottom: 30vh;
 }
 
 @media (prefers-reduced-motion: reduce) {

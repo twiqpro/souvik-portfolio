@@ -16,11 +16,11 @@ export const SECTION2_FADE_OUT = 0.14;
 export const SECTION3_P_START = 0.5;
 export const SECTION3_P_END = 0.76;
 export const SECTION3_FADE_IN = 0.1;
-export const SECTION3_FADE_OUT = 0.12;
+export const SECTION3_FADE_OUT = 0.16;
 
-/** Section 4 — starfield finale. */
-export const SECTION4_P_START = 0.76;
-export const SECTION4_FADE_IN = 0.12;
+/** Section 4 — shader finale (overlaps section 3 like S2→S3). */
+export const SECTION4_P_START = 0.68;
+export const SECTION4_FADE_IN = 0.18;
 
 /** Tunnel scroll spans S2 + S3 (drives backgrounds + card stack). */
 export const TUNNEL_P_START = SECTION2_P_START;
@@ -64,7 +64,7 @@ export function mapScrollProgress(progress) {
   const section3Content = clamp01((section3Phase - 0.02) / 0.014);
 
   const section4Phase = clamp01((p - SECTION4_P_START) / (1 - SECTION4_P_START));
-  const section4Content = clamp01((section4Phase - 0.02) / 0.014);
+  const section4Content = clamp01((section4Phase - 0.06) / 0.12);
 
   return {
     dive,

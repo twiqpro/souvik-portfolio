@@ -1,22 +1,21 @@
-import { Starfield } from '../components/Starfield';
-import { ExpandableGallery } from '../components/ExpandableGallery';
+import { CaseStudyCards } from '../components/CaseStudyCards';
+import { Section4ShaderBackground } from '../components/Section4ShaderBackground';
 import './Section4.css';
 
 /**
- * Section 4 — starfield + case studies (long scroll band).
+ * Section 4 — shader background + case studies.
  */
 function Section4({ active = false }) {
   return (
     <section
       id="section-4"
       className={`section-4${active ? ' section-4--active' : ''}`}
-      aria-label="Case studies"
+      aria-label="Selected work"
       aria-hidden={!active}
     >
       <div className="section-4__bg" aria-hidden="true">
-        <Starfield active={active} mouseAdjust clickToWarp speed={1.2} quantity={512} />
+        <Section4ShaderBackground active={active} />
       </div>
-      <div className="section-4__scrim" aria-hidden="true" />
 
       <div className="section-4__overlay">
         <header className="section-4__header">
@@ -25,8 +24,8 @@ function Section4({ active = false }) {
           </h2>
         </header>
 
-        <div className="section-4__cases" aria-label="Case study list">
-          <ExpandableGallery active={active} />
+        <div className="section-4__cases">
+          <CaseStudyCards active={active} />
         </div>
       </div>
     </section>

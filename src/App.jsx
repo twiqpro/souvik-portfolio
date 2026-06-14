@@ -50,7 +50,7 @@ function App() {
       setSection3Active(nextS3);
     }
 
-    const nextS4 = mapped.section4 > 0.08;
+    const nextS4 = mapped.section4 > 0.02;
     if (nextS4 !== section4ActiveRef.current) {
       section4ActiveRef.current = nextS4;
       setSection4Active(nextS4);
