@@ -27,7 +27,7 @@ function Section2({ active = false, diveRef = null }) {
           <span className="section-2__statement-lead">
             <span className="section-2__statement-line">I am an AI Native Product Designer</span>
             <span className="section-2__statement-line">
-              &amp; <s>Vibe Coder</s> Builder
+              &amp; <s className="section-2__statement-struck">Vibe Coder</s> Builder
             </span>
           </span>
         </h2>

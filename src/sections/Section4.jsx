@@ -22,7 +22,6 @@ function Section4({ active = false }) {
         <header className="section-4__header">
           <h2 className="section-4__statement">
             <span className="section-4__statement-line">Selected Work</span>
-            <span className="section-4__statement-sub">Case studies</span>
           </h2>
         </header>
 

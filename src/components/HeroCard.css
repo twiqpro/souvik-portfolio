@@ -1,6 +1,7 @@
 .hero-card {
   position: relative;
   width: min(92vw, 350px);
+  border-radius: 22px;
   --gold: #d4a853;
   --gold-bright: #f0d078;
   --gold-dim: #a8843a;

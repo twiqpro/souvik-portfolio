@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { CASE_STUDIES, CASE_STUDY_COUNT } from '../data/caseStudies';
+import { GALLERY_IMAGES, GALLERY_IMAGE_COUNT } from '../data/galleryImages';
 import { createClothCardMaterial } from '../shaders/clothCard';
 import './TunnelCardGallery.css';
 
@@ -36,7 +36,6 @@ function getTunnelVisibility(mapped) {
   return Math.max(mapped?.section2 ?? 0, mapped?.section3 ?? 0);
 }
 
-/** Shrink planes as they move toward the camera so they don't clip the canvas edges. */
 function getNearScaleDampen(worldZ) {
   if (worldZ <= 6) return 1;
   return Math.max(0.7, 1 - (worldZ - 6) * 0.014);
@@ -116,36 +115,15 @@ function buildSpatialPositions(count) {
   return positions;
 }
 
-function getActiveImageIndex(planesData) {
-  let bestIndex = 0;
-  let bestScore = -1;
-
-  planesData.forEach((plane) => {
-    const normalized = plane.z / DEPTH_RANGE;
-    const score = getOpacityForPosition(normalized);
-    if (score > bestScore) {
-      bestScore = score;
-      bestIndex = plane.imageIndex;
-    }
-  });
-
-  return bestIndex;
-}
-
 /**
- * Scroll-driven 3D card gallery (InfiniteGallery-style) for Sections 2 & 3.
+ * Scroll-driven 3D image gallery for Sections 2 & 3.
  */
 function TunnelCardGallery({ diveRef = null, active = false }) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
-  const captionRef = useRef(null);
-  const tagRef = useRef(null);
-  const titleRef = useRef(null);
-  const subtitleRef = useRef(null);
   const diveRefStable = useRef(diveRef);
   const activeRef = useRef(active);
   const lastPhaseRef = useRef(0);
-  const lastActiveIndexRef = useRef(-1);
 
   diveRefStable.current = diveRef;
   activeRef.current = active;
@@ -163,7 +141,7 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
     const planesData = Array.from({ length: VISIBLE_COUNT }, (_, i) => ({
       index: i,
       z: ((DEPTH_RANGE / VISIBLE_COUNT) * i) % DEPTH_RANGE,
-      imageIndex: i % CASE_STUDY_COUNT,
+      imageIndex: i % GALLERY_IMAGE_COUNT,
       x: spatialPositions[i].x,
       y: spatialPositions[i].y,
     }));
@@ -184,8 +162,8 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
     const loader = new THREE.TextureLoader();
     loader.setCrossOrigin('anonymous');
 
-    const textures = CASE_STUDIES.map((study) => {
-      const texture = loader.load(study.image);
+    const textures = GALLERY_IMAGES.map((src) => {
+      const texture = loader.load(src);
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.minFilter = THREE.LinearFilter;
       texture.magFilter = THREE.LinearFilter;
@@ -220,18 +198,6 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
     const clock = new THREE.Clock();
     let frameId = 0;
 
-    const updateCaption = (index, visibility) => {
-      const study = CASE_STUDIES[index];
-      if (!study || !captionRef.current) return;
-
-      captionRef.current.style.opacity = String(visibility);
-      captionRef.current.style.visibility = visibility < 0.04 ? 'hidden' : 'visible';
-
-      if (tagRef.current) tagRef.current.textContent = study.tag ?? '';
-      if (titleRef.current) titleRef.current.textContent = study.title;
-      if (subtitleRef.current) subtitleRef.current.textContent = study.subtitle;
-    };
-
     const tick = () => {
       frameId = requestAnimationFrame(tick);
 
@@ -250,7 +216,7 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
         return;
       }
 
-      const scrollOffset = stackPhase * DEPTH_RANGE * (CASE_STUDY_COUNT / VISIBLE_COUNT);
+      const scrollOffset = stackPhase * DEPTH_RANGE * (GALLERY_IMAGE_COUNT / VISIBLE_COUNT);
       const time = clock.getElapsedTime();
 
       materials.forEach((material) => {
@@ -267,7 +233,9 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
         const cycles = Math.floor(totalZ / DEPTH_RANGE);
 
         plane.z = newZ;
-        plane.imageIndex = ((i + cycles * imageAdvance) % CASE_STUDY_COUNT + CASE_STUDY_COUNT) % CASE_STUDY_COUNT;
+        plane.imageIndex =
+          ((i + cycles * imageAdvance) % GALLERY_IMAGE_COUNT + GALLERY_IMAGE_COUNT)
+          % GALLERY_IMAGE_COUNT;
         plane.x = spatialPositions[i].x;
         plane.y = spatialPositions[i].y;
 
@@ -293,19 +261,10 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
         mesh.visible = opacity > 0.005;
       });
 
-      const activeIndex = getActiveImageIndex(planesData);
-      if (activeIndex !== lastActiveIndexRef.current) {
-        lastActiveIndexRef.current = activeIndex;
-        updateCaption(activeIndex, visibility);
-      } else if (captionRef.current) {
-        captionRef.current.style.opacity = String(visibility);
-      }
-
       renderer.render(scene, camera);
     };
 
     frameId = requestAnimationFrame(tick);
-    updateCaption(0, 0);
 
     return () => {
       cancelAnimationFrame(frameId);
@@ -321,15 +280,10 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
   }, []);
 
   return (
-    <div ref={containerRef} className="tunnel-card-gallery" aria-label="Case study gallery">
+    <div ref={containerRef} className="tunnel-card-gallery" aria-label="Work gallery">
       <canvas ref={canvasRef} className="tunnel-card-gallery__canvas" />
-      <div ref={captionRef} className="tunnel-card-gallery__caption" aria-live="polite">
-        <span ref={tagRef} className="tunnel-card-gallery__tag" />
-        <h3 ref={titleRef} className="tunnel-card-gallery__title" />
-        <p ref={subtitleRef} className="tunnel-card-gallery__subtitle" />
-      </div>
     </div>
   );
 }
 
-export { TunnelCardGallery, CASE_STUDIES, CASE_STUDY_COUNT };
+export { TunnelCardGallery, GALLERY_IMAGES, GALLERY_IMAGE_COUNT };

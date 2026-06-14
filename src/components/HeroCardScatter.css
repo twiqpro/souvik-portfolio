@@ -12,6 +12,7 @@
 
 .hero-scatter__inner {
   position: relative;
+  border-radius: 22px;
   pointer-events: auto;
   will-change: transform;
   -webkit-mask-image: linear-gradient(
