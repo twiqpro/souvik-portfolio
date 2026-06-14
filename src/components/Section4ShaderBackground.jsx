@@ -219,6 +219,7 @@ class PointerHandler {
 function Section4ShaderBackground({ active = false }) {
   const canvasRef = useRef(null);
   const activeRef = useRef(active);
+  const loopControlRef = useRef(null);
   activeRef.current = active;
 
   useEffect(() => {
@@ -248,6 +249,8 @@ function Section4ShaderBackground({ active = false }) {
     };
 
     const loop = (now) => {
+      if (!activeRef.current) return;
+
       animationFrameId = requestAnimationFrame(loop);
 
       renderer.updateMouse(pointers.first);
@@ -255,12 +258,27 @@ function Section4ShaderBackground({ active = false }) {
       renderer.updatePointerCoords(pointers.coords);
       renderer.updateMove(pointers.move);
 
-      if (reducedMotion || !activeRef.current) {
+      if (reducedMotion) {
         renderer.render(frozenTime);
       } else {
         frozenTime = now;
         renderer.render(now);
       }
+    };
+
+    const startLoop = () => {
+      if (animationFrameId) return;
+      animationFrameId = requestAnimationFrame(loop);
+    };
+
+    const stopLoop = () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      animationFrameId = 0;
+    };
+
+    const syncLoop = () => {
+      if (activeRef.current) startLoop();
+      else stopLoop();
     };
 
     resize();
@@ -270,15 +288,23 @@ function Section4ShaderBackground({ active = false }) {
     }
 
     renderer.render(0);
-    loop(0);
+    loopControlRef.current = { startLoop, stopLoop };
+    syncLoop();
     window.addEventListener('resize', resize);
 
     return () => {
       window.removeEventListener('resize', resize);
-      cancelAnimationFrame(animationFrameId);
+      stopLoop();
+      loopControlRef.current = null;
       renderer.reset();
     };
   }, []);
+
+  useEffect(() => {
+    activeRef.current = active;
+    if (active) loopControlRef.current?.startLoop();
+    else loopControlRef.current?.stopLoop();
+  }, [active]);
 
   return (
     <canvas

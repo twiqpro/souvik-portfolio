@@ -32,6 +32,8 @@
 .hero-scatter__card-wrap {
   position: relative;
   z-index: 1;
+  width: min(92vw, 350px);
+  max-width: 100%;
   will-change: opacity;
 }
 

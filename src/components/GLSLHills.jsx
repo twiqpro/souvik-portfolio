@@ -174,7 +174,6 @@ const GLSLHills = ({
       antialias: false,
       alpha: true,
       powerPreference: 'high-performance',
-      logarithmicDepthBuffer: true,
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
@@ -186,12 +185,6 @@ const GLSLHills = ({
     const lookAtStart = new THREE.Vector3(0, 28, 0);
     const lookAtEnd = new THREE.Vector3(0, 22, 0);
     const lookAt = new THREE.Vector3();
-    const cameraState = {
-      z: cameraZ,
-      y: 16,
-      fov: 45,
-      lookY: 28,
-    };
 
     const resize = () => {
       const w = window.innerWidth;
@@ -218,19 +211,11 @@ const GLSLHills = ({
 
       if (dive?.current) {
         const { ease, cameraY, cameraFov } = getCameraDiveState(dive.current.current);
-        const targetZ = THREE.MathUtils.lerp(cameraZ, cameraZEnd, ease);
-        const targetLookY = THREE.MathUtils.lerp(28, 22, ease);
-
-        cameraState.z += (targetZ - cameraState.z) * 0.22;
-        cameraState.y += (cameraY - cameraState.y) * 0.22;
-        cameraState.fov += (cameraFov - cameraState.fov) * 0.22;
-        cameraState.lookY += (targetLookY - cameraState.lookY) * 0.22;
-
-        camera.position.z = cameraState.z;
-        camera.position.y = cameraState.y;
-        camera.fov = cameraState.fov;
-        lookAt.set(0, cameraState.lookY, 0);
+        camera.position.z = THREE.MathUtils.lerp(cameraZ, cameraZEnd, ease);
+        camera.position.y = cameraY;
+        lookAt.copy(lookAtStart).lerp(lookAtEnd, ease);
         camera.lookAt(lookAt);
+        camera.fov = cameraFov;
         camera.updateProjectionMatrix();
       }
 

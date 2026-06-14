@@ -22,6 +22,11 @@ export const SECTION3_FADE_OUT = 0.16;
 export const SECTION4_P_START = SECTION3_P_END + SECTION3_FADE_OUT;
 export const SECTION4_FADE_IN = 0.08;
 
+/** Wheel progress value that lands in Section 4 (uses existing scroll smoothing). */
+export function getSection4ScrollTarget() {
+  return SECTION4_P_START * SCROLL_RANGE;
+}
+
 /** Tunnel scroll spans S2 + S3 (drives backgrounds + card stack). */
 export const TUNNEL_P_START = SECTION2_P_START;
 export const TUNNEL_P_END = 0.88;

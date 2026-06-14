@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getSection4ScrollTarget } from '../utils/scrollProgress';
 import './HeroCard.css';
 
 function StarIcon() {
@@ -24,15 +25,20 @@ function BriefcaseIcon() {
   );
 }
 
-function HeroCard() {
+function HeroCard({ diveRef = null }) {
   const [imgError, setImgError] = useState(false);
+
+  const goToCaseStudies = (event) => {
+    event.preventDefault();
+    if (!diveRef?.current) return;
+    diveRef.current.target = getSection4ScrollTarget();
+  };
 
   return (
     <article className="hero-card" aria-label="Introduction">
       <div className="hero-card__glass">
         <div className="hero-card__content">
           <div className="hero-card__avatar-block">
-            <div className="hero-card__avatar-ring" aria-hidden="true" />
             {!imgError ? (
               <img
                 className="hero-card__avatar"
@@ -73,7 +79,15 @@ function HeroCard() {
           </footer>
         </div>
 
-        <div className="hero-card__spacer" aria-hidden="true" />
+        <div className="hero-card__spacer">
+          <a
+            href="#section-4"
+            className="hero-card__case-studies-btn"
+            onClick={goToCaseStudies}
+          >
+            Case Studies
+          </a>
+        </div>
       </div>
     </article>
   );

@@ -200,7 +200,7 @@ function HeroCardScatter({ diveRef = null }) {
     <div className="hero-scatter">
       <div className="hero-scatter__inner" ref={innerRef}>
         <div className="hero-scatter__card-wrap" ref={cardRef}>
-          <HeroCard />
+          <HeroCard diveRef={diveRef} />
         </div>
         <canvas className="hero-scatter__canvas" ref={canvasRef} aria-hidden="true" />
       </div>
