@@ -1,10 +1,32 @@
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
 
 /** Raw wheel progress runs 0 → SCROLL_RANGE before the experience is fully complete. */
-export const SCROLL_RANGE = 7.5;
+export const SCROLL_RANGE = 18;
 
 /** Normalized scroll (0→1) at which hero dive / --dive reaches full strength. */
-export const HERO_DIVE_END_P = 0.48;
+export const HERO_DIVE_END_P = 0.26;
+
+/** Section 2 band (≈2× previous scroll distance). */
+export const SECTION2_P_START = 0.22;
+export const SECTION2_P_END = 0.62;
+export const SECTION2_FADE_IN = 0.08;
+export const SECTION2_FADE_OUT = 0.14;
+
+/** Section 3 band (≈2× previous scroll distance). */
+export const SECTION3_P_START = 0.5;
+export const SECTION3_P_END = 0.76;
+export const SECTION3_FADE_IN = 0.1;
+export const SECTION3_FADE_OUT = 0.12;
+
+/** Section 4 — starfield finale. */
+export const SECTION4_P_START = 0.76;
+export const SECTION4_FADE_IN = 0.12;
+
+/** Tunnel scroll spans S2 + S3 (drives backgrounds + card stack). */
+export const TUNNEL_P_START = SECTION2_P_START;
+export const TUNNEL_P_END = 0.88;
+export const TUNNEL_P_SPAN = TUNNEL_P_END - TUNNEL_P_START;
+export const TUNNEL_SECTION2_END = (SECTION2_P_END - SECTION2_P_START) / TUNNEL_P_SPAN;
 
 /**
  * Map unified scroll progress to layered crossfade channels.
@@ -15,30 +37,33 @@ export function mapScrollProgress(progress) {
 
   const dive = clamp01(p / HERO_DIVE_END_P);
 
-  const section2In = clamp01((p - 0.26) / 0.14);
-  const section2Out = 1 - clamp01((p - 0.48) / 0.16);
+  const section2In = clamp01((p - SECTION2_P_START) / SECTION2_FADE_IN);
+  const section2Out = 1 - clamp01((p - SECTION2_P_END) / SECTION2_FADE_OUT);
   const section2 = Math.min(section2In, section2Out);
 
-  /** Section 3 — full transition window (unchanged from earlier tuning). */
-  const section3In = clamp01((p - 0.44) / 0.14);
-  const section3Out = 1 - clamp01((p - 0.68) / 0.16);
+  const section3In = clamp01((p - SECTION3_P_START) / SECTION3_FADE_IN);
+  const section3Out = 1 - clamp01((p - SECTION3_P_END) / SECTION3_FADE_OUT);
   const section3 = Math.min(section3In, section3Out);
 
-  /** Section 4 — final section; stays visible once entered. */
-  const section4 = clamp01((p - 0.58) / 0.12);
+  const section4 = clamp01((p - SECTION4_P_START) / SECTION4_FADE_IN);
 
-  /** Tunnel scrub through S2 + full S3 fade (incl. S3→S4 crossfade). */
-  const tunnelProgress = clamp01((p - 0.26) / 0.5);
+  const tunnelProgress = clamp01((p - TUNNEL_P_START) / TUNNEL_P_SPAN);
+  const section2TunnelPhase = clamp01(tunnelProgress / TUNNEL_SECTION2_END);
 
-  const forwardProgress = clamp01((p - 0.26) / 0.72);
+  const forwardProgress = clamp01((p - TUNNEL_P_START) / (1 - TUNNEL_P_START));
 
-  const section2Phase = clamp01((p - 0.26) / 0.22);
-  const section2Content = clamp01((section2Phase - 0.02) / 0.014);
+  const section2Span = SECTION2_P_END - SECTION2_P_START + SECTION2_FADE_OUT;
+  const section2Phase = clamp01((p - SECTION2_P_START) / section2Span);
+  const section2Content = clamp01((section2Phase - 0.04) / 0.02);
 
-  const section3Phase = clamp01((p - 0.44) / 0.32);
+  /** Legacy stack phase channel (unused — cards use tunnelProgress). */
+  const section2StackPhase = clamp01((p - (SECTION2_P_START + 0.04)) / (section2Span - 0.04));
+
+  const section3Span = SECTION3_P_END - SECTION3_P_START + SECTION3_FADE_OUT;
+  const section3Phase = clamp01((p - SECTION3_P_START) / section3Span);
   const section3Content = clamp01((section3Phase - 0.02) / 0.014);
 
-  const section4Phase = clamp01((p - 0.58) / 0.36);
+  const section4Phase = clamp01((p - SECTION4_P_START) / (1 - SECTION4_P_START));
   const section4Content = clamp01((section4Phase - 0.02) / 0.014);
 
   return {
@@ -46,6 +71,8 @@ export function mapScrollProgress(progress) {
     section2,
     section2Content,
     section2Phase,
+    section2StackPhase,
+    section2TunnelPhase,
     section3,
     section3Content,
     section3Phase,

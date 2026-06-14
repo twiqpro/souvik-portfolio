@@ -1,12 +1,14 @@
 import { useCallback, useRef, useState } from 'react';
 import { GLSLHills } from './components/GLSLHills';
 import { HeroHang } from './components/HeroHang';
+import { TunnelCardGallery } from './components/TunnelCardGallery';
 import { Section2 } from './sections/Section2';
 import { Section3 } from './sections/Section3';
 import { Section4 } from './sections/Section4';
 import { useDiveScroll } from './hooks/useDiveScroll';
 import { mapScrollProgress, SCROLL_RANGE } from './utils/scrollProgress';
 import './App.css';
+import './components/TunnelCardStack.css';
 
 const SCROLL_SMOOTHING = 0.14;
 
@@ -86,6 +88,14 @@ function App() {
 
       <Section2 active={section2Active} diveRef={dive} />
       <Section3 active={section3Active} diveRef={dive} />
+
+      <div className="tunnel-card-stack" aria-hidden={!(section2Active || section3Active)}>
+        <TunnelCardGallery
+          diveRef={dive}
+          active={section2Active || section3Active}
+        />
+      </div>
+
       <Section4 active={section4Active} />
 
       <div className="dive-vignette" aria-hidden="true" />

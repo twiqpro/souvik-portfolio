@@ -1,0 +1,335 @@
+import { useEffect, useRef } from 'react';
+import * as THREE from 'three';
+import { CASE_STUDIES, CASE_STUDY_COUNT } from '../data/caseStudies';
+import { createClothCardMaterial } from '../shaders/clothCard';
+import './TunnelCardGallery.css';
+
+const VISIBLE_COUNT = 8;
+const DEPTH_RANGE = 50;
+const MAX_HORIZONTAL_OFFSET = 6;
+const MAX_VERTICAL_OFFSET = 4;
+const STACK_HOLD = 0.08;
+const PLANE_BASE_SCALE = 2.05;
+const CAMERA_FOV = 68;
+
+const FADE_SETTINGS = {
+  fadeIn: { start: 0.05, end: 0.22 },
+  fadeOut: { start: 0.58, end: 0.82 },
+};
+
+const BLUR_SETTINGS = {
+  blurIn: { start: 0.0, end: 0.12 },
+  blurOut: { start: 0.58, end: 0.82 },
+  maxBlur: 5.0,
+};
+
+function clamp01(v) {
+  return Math.max(0, Math.min(1, v));
+}
+
+function getStackProgress(rawPhase) {
+  if (rawPhase <= STACK_HOLD) return 0;
+  return clamp01((rawPhase - STACK_HOLD) / (1 - STACK_HOLD));
+}
+
+function getTunnelVisibility(mapped) {
+  return Math.max(mapped?.section2 ?? 0, mapped?.section3 ?? 0);
+}
+
+/** Shrink planes as they move toward the camera so they don't clip the canvas edges. */
+function getNearScaleDampen(worldZ) {
+  if (worldZ <= 6) return 1;
+  return Math.max(0.7, 1 - (worldZ - 6) * 0.014);
+}
+
+function getOpacityForPosition(normalizedPosition) {
+  let opacity = 1;
+
+  if (
+    normalizedPosition >= FADE_SETTINGS.fadeIn.start
+    && normalizedPosition <= FADE_SETTINGS.fadeIn.end
+  ) {
+    const t =
+      (normalizedPosition - FADE_SETTINGS.fadeIn.start)
+      / (FADE_SETTINGS.fadeIn.end - FADE_SETTINGS.fadeIn.start);
+    opacity = t;
+  } else if (normalizedPosition < FADE_SETTINGS.fadeIn.start) {
+    opacity = 0;
+  } else if (
+    normalizedPosition >= FADE_SETTINGS.fadeOut.start
+    && normalizedPosition <= FADE_SETTINGS.fadeOut.end
+  ) {
+    const t =
+      (normalizedPosition - FADE_SETTINGS.fadeOut.start)
+      / (FADE_SETTINGS.fadeOut.end - FADE_SETTINGS.fadeOut.start);
+    opacity = 1 - t;
+  } else if (normalizedPosition > FADE_SETTINGS.fadeOut.end) {
+    opacity = 0;
+  }
+
+  return clamp01(opacity);
+}
+
+function getBlurForPosition(normalizedPosition) {
+  let blur = 0;
+
+  if (
+    normalizedPosition >= BLUR_SETTINGS.blurIn.start
+    && normalizedPosition <= BLUR_SETTINGS.blurIn.end
+  ) {
+    const t =
+      (normalizedPosition - BLUR_SETTINGS.blurIn.start)
+      / (BLUR_SETTINGS.blurIn.end - BLUR_SETTINGS.blurIn.start);
+    blur = BLUR_SETTINGS.maxBlur * (1 - t);
+  } else if (normalizedPosition < BLUR_SETTINGS.blurIn.start) {
+    blur = BLUR_SETTINGS.maxBlur;
+  } else if (
+    normalizedPosition >= BLUR_SETTINGS.blurOut.start
+    && normalizedPosition <= BLUR_SETTINGS.blurOut.end
+  ) {
+    const t =
+      (normalizedPosition - BLUR_SETTINGS.blurOut.start)
+      / (BLUR_SETTINGS.blurOut.end - BLUR_SETTINGS.blurOut.start);
+    blur = BLUR_SETTINGS.maxBlur * t;
+  } else if (normalizedPosition > BLUR_SETTINGS.blurOut.end) {
+    blur = BLUR_SETTINGS.maxBlur;
+  }
+
+  return Math.max(0, Math.min(BLUR_SETTINGS.maxBlur, blur));
+}
+
+function buildSpatialPositions(count) {
+  const positions = [];
+
+  for (let i = 0; i < count; i += 1) {
+    const horizontalAngle = (i * 2.618) % (Math.PI * 2);
+    const verticalAngle = (i * 1.618 + Math.PI / 3) % (Math.PI * 2);
+    const horizontalRadius = (i % 3) * 1.2;
+    const verticalRadius = ((i + 1) % 4) * 0.8;
+
+    positions.push({
+      x: (Math.sin(horizontalAngle) * horizontalRadius * MAX_HORIZONTAL_OFFSET) / 3,
+      y: (Math.cos(verticalAngle) * verticalRadius * MAX_VERTICAL_OFFSET) / 4,
+    });
+  }
+
+  return positions;
+}
+
+function getActiveImageIndex(planesData) {
+  let bestIndex = 0;
+  let bestScore = -1;
+
+  planesData.forEach((plane) => {
+    const normalized = plane.z / DEPTH_RANGE;
+    const score = getOpacityForPosition(normalized);
+    if (score > bestScore) {
+      bestScore = score;
+      bestIndex = plane.imageIndex;
+    }
+  });
+
+  return bestIndex;
+}
+
+/**
+ * Scroll-driven 3D card gallery (InfiniteGallery-style) for Sections 2 & 3.
+ */
+function TunnelCardGallery({ diveRef = null, active = false }) {
+  const containerRef = useRef(null);
+  const canvasRef = useRef(null);
+  const captionRef = useRef(null);
+  const tagRef = useRef(null);
+  const titleRef = useRef(null);
+  const subtitleRef = useRef(null);
+  const diveRefStable = useRef(diveRef);
+  const activeRef = useRef(active);
+  const lastPhaseRef = useRef(0);
+  const lastActiveIndexRef = useRef(-1);
+
+  diveRefStable.current = diveRef;
+  activeRef.current = active;
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const canvas = canvasRef.current;
+    if (!container || !canvas) return undefined;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const spatialPositions = buildSpatialPositions(VISIBLE_COUNT);
+    const halfRange = DEPTH_RANGE / 2;
+    const imageAdvance = 1;
+
+    const planesData = Array.from({ length: VISIBLE_COUNT }, (_, i) => ({
+      index: i,
+      z: ((DEPTH_RANGE / VISIBLE_COUNT) * i) % DEPTH_RANGE,
+      imageIndex: i % CASE_STUDY_COUNT,
+      x: spatialPositions[i].x,
+      y: spatialPositions[i].y,
+    }));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(CAMERA_FOV, 1, 0.1, 200);
+    camera.position.set(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance',
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+
+    const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin('anonymous');
+
+    const textures = CASE_STUDIES.map((study) => {
+      const texture = loader.load(study.image);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      return texture;
+    });
+
+    const materials = Array.from({ length: VISIBLE_COUNT }, () => {
+      const config = createClothCardMaterial();
+      return new THREE.ShaderMaterial(config);
+    });
+
+    const meshes = planesData.map((plane, i) => {
+      const geometry = new THREE.PlaneGeometry(1, 1, 32, 32);
+      const mesh = new THREE.Mesh(geometry, materials[i]);
+      mesh.userData.planeIndex = i;
+      scene.add(mesh);
+      return mesh;
+    });
+
+    const resize = () => {
+      const { clientWidth, clientHeight } = container;
+      if (clientWidth === 0 || clientHeight === 0) return;
+      renderer.setSize(clientWidth, clientHeight, false);
+      camera.aspect = clientWidth / clientHeight;
+      camera.updateProjectionMatrix();
+    };
+
+    const ro = new ResizeObserver(resize);
+    ro.observe(container);
+    resize();
+
+    const clock = new THREE.Clock();
+    let frameId = 0;
+
+    const updateCaption = (index, visibility) => {
+      const study = CASE_STUDIES[index];
+      if (!study || !captionRef.current) return;
+
+      captionRef.current.style.opacity = String(visibility);
+      captionRef.current.style.visibility = visibility < 0.04 ? 'hidden' : 'visible';
+
+      if (tagRef.current) tagRef.current.textContent = study.tag ?? '';
+      if (titleRef.current) titleRef.current.textContent = study.title;
+      if (subtitleRef.current) subtitleRef.current.textContent = study.subtitle;
+    };
+
+    const tick = () => {
+      frameId = requestAnimationFrame(tick);
+
+      const mapped = diveRefStable.current?.current?.mapped;
+      const visibility = getTunnelVisibility(mapped);
+      const tunnelProgress = mapped?.tunnelProgress ?? 0;
+      const stackPhase = getStackProgress(tunnelProgress);
+      const scrollForce = (tunnelProgress - lastPhaseRef.current) * 80;
+      lastPhaseRef.current = tunnelProgress;
+
+      container.style.opacity = String(visibility);
+      container.style.visibility = visibility < 0.02 ? 'hidden' : 'visible';
+
+      if (!activeRef.current || visibility < 0.02) {
+        renderer.render(scene, camera);
+        return;
+      }
+
+      const scrollOffset = stackPhase * DEPTH_RANGE * (CASE_STUDY_COUNT / VISIBLE_COUNT);
+      const time = clock.getElapsedTime();
+
+      materials.forEach((material) => {
+        material.uniforms.time.value = time;
+        material.uniforms.scrollForce.value = reducedMotion ? 0 : scrollForce;
+      });
+
+      planesData.forEach((plane, i) => {
+        const mesh = meshes[i];
+        const material = materials[i];
+        const baseZ = (DEPTH_RANGE / VISIBLE_COUNT) * i;
+        const totalZ = baseZ + scrollOffset;
+        const newZ = ((totalZ % DEPTH_RANGE) + DEPTH_RANGE) % DEPTH_RANGE;
+        const cycles = Math.floor(totalZ / DEPTH_RANGE);
+
+        plane.z = newZ;
+        plane.imageIndex = ((i + cycles * imageAdvance) % CASE_STUDY_COUNT + CASE_STUDY_COUNT) % CASE_STUDY_COUNT;
+        plane.x = spatialPositions[i].x;
+        plane.y = spatialPositions[i].y;
+
+        const texture = textures[plane.imageIndex];
+        if (!texture?.image) return;
+
+        const normalizedPosition = plane.z / DEPTH_RANGE;
+        const opacity = getOpacityForPosition(normalizedPosition) * visibility;
+        const blur = reducedMotion ? 0 : getBlurForPosition(normalizedPosition);
+
+        material.uniforms.map.value = texture;
+        material.uniforms.opacity.value = opacity;
+        material.uniforms.blurAmount.value = blur;
+
+        const worldZ = plane.z - halfRange;
+        const scaleMul = PLANE_BASE_SCALE * getNearScaleDampen(worldZ);
+        const aspect = texture.image.width / texture.image.height;
+        const scaleX = aspect > 1 ? scaleMul * aspect : scaleMul;
+        const scaleY = aspect > 1 ? scaleMul : scaleMul / aspect;
+
+        mesh.position.set(plane.x, plane.y, worldZ);
+        mesh.scale.set(scaleX, scaleY, 1);
+        mesh.visible = opacity > 0.005;
+      });
+
+      const activeIndex = getActiveImageIndex(planesData);
+      if (activeIndex !== lastActiveIndexRef.current) {
+        lastActiveIndexRef.current = activeIndex;
+        updateCaption(activeIndex, visibility);
+      } else if (captionRef.current) {
+        captionRef.current.style.opacity = String(visibility);
+      }
+
+      renderer.render(scene, camera);
+    };
+
+    frameId = requestAnimationFrame(tick);
+    updateCaption(0, 0);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      ro.disconnect();
+      meshes.forEach((mesh) => {
+        mesh.geometry.dispose();
+        scene.remove(mesh);
+      });
+      materials.forEach((material) => material.dispose());
+      textures.forEach((texture) => texture.dispose());
+      renderer.dispose();
+    };
+  }, []);
+
+  return (
+    <div ref={containerRef} className="tunnel-card-gallery" aria-label="Case study gallery">
+      <canvas ref={canvasRef} className="tunnel-card-gallery__canvas" />
+      <div ref={captionRef} className="tunnel-card-gallery__caption" aria-live="polite">
+        <span ref={tagRef} className="tunnel-card-gallery__tag" />
+        <h3 ref={titleRef} className="tunnel-card-gallery__title" />
+        <p ref={subtitleRef} className="tunnel-card-gallery__subtitle" />
+      </div>
+    </div>
+  );
+}
+
+export { TunnelCardGallery, CASE_STUDIES, CASE_STUDY_COUNT };

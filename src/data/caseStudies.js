@@ -1,0 +1,103 @@
+/** 14 case studies — cards 1–7 in Section 2, 8–14 in Section 3 (tunnel scroll). */
+export const CASE_STUDIES = [
+  {
+    id: 'landing',
+    title: 'Landing redesign',
+    subtitle: 'Conversion-focused marketing experience',
+    tag: 'Product design',
+    image: '/section-2/work-landing.png',
+  },
+  {
+    id: 'crm',
+    title: 'CRM platform',
+    subtitle: 'Workflow tools for sales teams',
+    tag: 'UX · Systems',
+    image: '/section-2/work-crm.png',
+  },
+  {
+    id: 'integrations',
+    title: 'Integrations hub',
+    subtitle: 'Connecting products across the stack',
+    tag: 'AI-native',
+    image: '/section-2/work-integrations.png',
+  },
+  {
+    id: 'dashboard',
+    title: 'Analytics dashboard',
+    subtitle: 'Real-time insights for product teams',
+    tag: 'Data UX',
+    image: 'https://images.unsplash.com/photo-1756993399574-2fa126269ce7?w=900&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'workspace',
+    title: 'Design workspace',
+    subtitle: 'Collaborative flows for cross-functional teams',
+    tag: 'Systems',
+    image: 'https://images.unsplash.com/photo-1756838197413-07f174def66c?w=900&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'mobile',
+    title: 'Mobile checkout',
+    subtitle: 'Frictionless payment flows on iOS',
+    tag: 'Mobile',
+    image: 'https://images.unsplash.com/photo-1756990637536-714b76296a30?w=900&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'research',
+    title: 'Research ops',
+    subtitle: 'Scaling user insights across squads',
+    tag: 'Research',
+    image: 'https://images.unsplash.com/photo-1756310406492-3ce3bef447aa?w=900&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'design-system',
+    title: 'Design system',
+    subtitle: 'Tokens, components, and documentation',
+    tag: 'Systems',
+    image: 'https://images.unsplash.com/photo-1755311905796-d539c7d24acd?w=900&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'ai-assistant',
+    title: 'AI assistant',
+    subtitle: 'Context-aware copilot for PMs',
+    tag: 'AI-native',
+    image: 'https://images.unsplash.com/photo-1755542366797-b3f036b11310?w=900&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'onboarding',
+    title: 'Onboarding flows',
+    subtitle: 'First-run experience for enterprise users',
+    tag: 'Product design',
+    image: 'https://images.unsplash.com/photo-1755398104393-746e52af4a9f?w=900&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'billing',
+    title: 'Billing portal',
+    subtitle: 'Self-serve subscriptions and invoices',
+    tag: 'UX · Systems',
+    image: 'https://images.unsplash.com/photo-1756764099214-b09a5666914b?w=900&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'devtools',
+    title: 'Developer tools',
+    subtitle: 'API console and integration testing',
+    tag: 'DevEx',
+    image: 'https://images.unsplash.com/photo-1757372429884-92e02350c5d9?w=900&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'marketplace',
+    title: 'App marketplace',
+    subtitle: 'Discovery and install for third-party apps',
+    tag: 'Platform',
+    image: 'https://images.unsplash.com/photo-1756993399574-2fa126269ce7?w=900&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'vision',
+    title: 'Product vision',
+    subtitle: 'North-star concepts for 2026 roadmap',
+    tag: 'Strategy',
+    image: 'https://images.unsplash.com/photo-1756838197413-07f174def66c?w=900&auto=format&fit=crop&q=60',
+  },
+];
+
+export const CASE_STUDY_COUNT = CASE_STUDIES.length;
