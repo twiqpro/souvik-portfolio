@@ -2,7 +2,7 @@
   position: relative;
   width: min(92vw, 350px);
   max-width: 100%;
-  border-radius: 22px;
+  border-radius: 22px 22px 0 0;
   --gold: #d4a853;
   --gold-bright: #f0d078;
   --gold-dim: #a8843a;
@@ -19,7 +19,7 @@
   max-width: 100%;
   height: 450px;
   padding: 2rem 1.35rem 1.5rem;
-  border-radius: 22px;
+  border-radius: 22px 22px 0 0;
   text-align: center;
   background: rgba(8, 8, 10, 0.42);
   backdrop-filter: blur(18px) saturate(1.2);
