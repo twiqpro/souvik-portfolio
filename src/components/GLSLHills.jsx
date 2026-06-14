@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { getCameraDiveState } from '../utils/cameraDive';
+import { useAnimationFrame } from '../hooks/useAnimationFrame';
 
 const GLSLHills = ({
   width = '100vw',
@@ -8,18 +9,15 @@ const GLSLHills = ({
   cameraZ = 125,
   cameraZEnd = 8,
   planeSize = 256,
+  segments = 256,
   speed = 0.5,
   diveRef = null,
-  onFrame = null,
 }) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
-  const frameRef = useRef(null);
-  const rendererRef = useRef(null);
+  const runtimeRef = useRef(null);
   const diveRefStable = useRef(diveRef);
-  const onFrameRef = useRef(onFrame);
   diveRefStable.current = diveRef;
-  onFrameRef.current = onFrame;
 
   useEffect(() => {
     class Plane {
@@ -28,12 +26,12 @@ const GLSLHills = ({
           time: { type: 'f', value: 0 },
         };
         this.mesh = this.createMesh();
-        this.time = speed;
+        this.speed = speed;
       }
 
       createMesh() {
         return new THREE.Mesh(
-          new THREE.PlaneGeometry(planeSize, planeSize, planeSize, planeSize),
+          new THREE.PlaneGeometry(planeSize, planeSize, segments, segments),
           new THREE.RawShaderMaterial({
             uniforms: this.uniforms,
             vertexShader: `
@@ -156,42 +154,55 @@ const GLSLHills = ({
               }
             `,
             transparent: true,
+            depthWrite: false,
+            depthTest: false,
+            blending: THREE.NormalBlending,
           }),
         );
       }
 
-      render(time) {
-        this.uniforms.time.value += time * this.time;
+      setTime(elapsed) {
+        this.uniforms.time.value = elapsed * this.speed;
       }
     }
 
     const canvas = canvasRef.current;
     if (!canvas) return undefined;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-    rendererRef.current = renderer;
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: false,
+      alpha: true,
+      powerPreference: 'high-performance',
+      logarithmicDepthBuffer: true,
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
     const clock = new THREE.Clock();
     const plane = new Plane();
 
-    const resize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      canvas.width = w;
-      canvas.height = h;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
-
     const lookAtStart = new THREE.Vector3(0, 28, 0);
     const lookAtEnd = new THREE.Vector3(0, 22, 0);
     const lookAt = new THREE.Vector3();
+    const cameraState = {
+      z: cameraZ,
+      y: 16,
+      fov: 45,
+      lookY: 28,
+    };
+
+    const resize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(w, h, false);
+    };
 
     const render = () => {
-      onFrameRef.current?.();
-
       const dive = diveRefStable.current;
       const mapped = dive?.current?.mapped;
       const sectionsVisible = Math.max(
@@ -199,46 +210,55 @@ const GLSLHills = ({
         mapped?.section3 ?? 0,
         mapped?.section4 ?? 0,
       );
+      const heroOpacity = 1 - sectionsVisible;
 
-      if (sectionsVisible < 0.12) {
-        plane.render(clock.getDelta());
+      if (heroOpacity <= 0.01) return;
 
-        if (dive?.current) {
-          const { ease, cameraY, cameraFov } = getCameraDiveState(dive.current.current);
-          camera.position.z = THREE.MathUtils.lerp(cameraZ, cameraZEnd, ease);
-          camera.position.y = cameraY;
-          lookAt.copy(lookAtStart).lerp(lookAtEnd, ease);
-          camera.lookAt(lookAt);
-          camera.fov = cameraFov;
-          camera.updateProjectionMatrix();
-        }
+      plane.setTime(clock.getElapsedTime());
 
-        renderer.render(scene, camera);
+      if (dive?.current) {
+        const { ease, cameraY, cameraFov } = getCameraDiveState(dive.current.current);
+        const targetZ = THREE.MathUtils.lerp(cameraZ, cameraZEnd, ease);
+        const targetLookY = THREE.MathUtils.lerp(28, 22, ease);
+
+        cameraState.z += (targetZ - cameraState.z) * 0.22;
+        cameraState.y += (cameraY - cameraState.y) * 0.22;
+        cameraState.fov += (cameraFov - cameraState.fov) * 0.22;
+        cameraState.lookY += (targetLookY - cameraState.lookY) * 0.22;
+
+        camera.position.z = cameraState.z;
+        camera.position.y = cameraState.y;
+        camera.fov = cameraState.fov;
+        lookAt.set(0, cameraState.lookY, 0);
+        camera.lookAt(lookAt);
+        camera.updateProjectionMatrix();
       }
-    };
 
-    const renderLoop = () => {
-      render();
-      frameRef.current = requestAnimationFrame(renderLoop);
+      renderer.render(scene, camera);
     };
 
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 0);
     camera.position.set(0, 16, cameraZ);
-    camera.lookAt(new THREE.Vector3(0, 28, 0));
+    camera.lookAt(lookAtStart);
     scene.add(plane.mesh);
     window.addEventListener('resize', resize);
     resize();
-    renderLoop();
+
+    runtimeRef.current = { render };
 
     return () => {
       window.removeEventListener('resize', resize);
-      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+      runtimeRef.current = null;
       plane.mesh.geometry.dispose();
       plane.mesh.material.dispose();
       renderer.dispose();
     };
-  }, [cameraZ, cameraZEnd, planeSize, speed]);
+  }, [cameraZ, cameraZEnd, planeSize, segments, speed]);
+
+  useAnimationFrame(() => {
+    runtimeRef.current?.render();
+  });
 
   return (
     <div ref={containerRef} style={{ position: 'relative', width, height }}>

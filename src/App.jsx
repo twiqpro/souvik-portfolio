@@ -6,6 +6,7 @@ import { Section2 } from './sections/Section2';
 import { Section3 } from './sections/Section3';
 import { Section4 } from './sections/Section4';
 import { useDiveScroll } from './hooks/useDiveScroll';
+import { useScrollFrame } from './hooks/useScrollFrame';
 import { mapScrollProgress, SCROLL_RANGE } from './utils/scrollProgress';
 import './App.css';
 import './components/TunnelCardStack.css';
@@ -21,9 +22,10 @@ function App() {
   const section3ActiveRef = useRef(false);
   const section4ActiveRef = useRef(false);
 
-  const handleScrollFrame = useCallback(() => {
+  const handleScrollFrame = useCallback((dt) => {
     const { target, current } = dive.current;
-    dive.current.current += (target - current) * SCROLL_SMOOTHING;
+    const factor = 1 - (1 - SCROLL_SMOOTHING) ** (dt * 60);
+    dive.current.current += (target - current) * factor;
 
     const mapped = mapScrollProgress(dive.current.current);
     dive.current.mapped = mapped;
@@ -57,6 +59,8 @@ function App() {
     }
   }, [dive]);
 
+  useScrollFrame(handleScrollFrame);
+
   const scrollHint = section4Active
     ? 'Scroll · explore case studies'
     : section3Active
@@ -72,7 +76,6 @@ function App() {
       <div className="app__hills">
         <GLSLHills
           diveRef={dive}
-          onFrame={handleScrollFrame}
           cameraZ={125}
           cameraZEnd={8}
           planeSize={256}

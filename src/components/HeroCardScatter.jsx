@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { toCanvas } from 'html-to-image';
 import { getCameraDiveState, getCardDissolveProgress, getCardDriftProgress } from '../utils/cameraDive';
+import { useAnimationFrame } from '../hooks/useAnimationFrame';
 import { HeroCard } from './HeroCard';
 import './HeroCardScatter.css';
 
@@ -57,7 +58,6 @@ function HeroCardScatter({ diveRef = null }) {
   const cardRef = useRef(null);
   const canvasRef = useRef(null);
   const particlesRef = useRef(null);
-  const rafRef = useRef(null);
   const reducedMotionRef = useRef(false);
   const captureGenRef = useRef(0);
 
@@ -136,73 +136,65 @@ function HeroCardScatter({ diveRef = null }) {
     };
   }, [captureDust]);
 
-  useEffect(() => {
-    const tick = () => {
-      const scrollProgress = diveRef?.current?.current ?? 0;
-      const { t: dive, ease, cardZoom } = getCameraDiveState(scrollProgress);
-      const dissolve = getCardDissolveProgress(ease);
-      const drift = getCardDriftProgress(ease);
-      const inner = innerRef.current;
-      const canvas = canvasRef.current;
-      const card = cardRef.current;
-      const data = particlesRef.current;
+  useAnimationFrame(() => {
+    const scrollProgress = diveRef?.current?.current ?? 0;
+    const { t: dive, ease, cardZoom } = getCameraDiveState(scrollProgress);
+    const dissolve = getCardDissolveProgress(ease);
+    const drift = getCardDriftProgress(ease);
+    const inner = innerRef.current;
+    const canvas = canvasRef.current;
+    const card = cardRef.current;
+    const data = particlesRef.current;
 
-      if (inner && !reducedMotionRef.current) {
-        inner.style.transform = `translateY(${-dive * 10}vh) scale(${cardZoom})`;
-      } else if (inner) {
-        inner.style.transform = '';
+    if (inner && !reducedMotionRef.current) {
+      inner.style.transform = `translateY(${-dive * 10}vh) scale(${cardZoom})`;
+    } else if (inner) {
+      inner.style.transform = '';
+    }
+
+    if (card) {
+      if (reducedMotionRef.current) {
+        card.style.opacity = String(Math.max(0, 1 - ease * 1.15));
+      } else {
+        const cardOpacity = 1 - dissolve;
+        card.style.opacity = String(cardOpacity);
+        card.style.visibility = cardOpacity <= 0.01 ? 'hidden' : 'visible';
       }
+    }
 
-      if (card) {
-        if (reducedMotionRef.current) {
-          card.style.opacity = String(Math.max(0, 1 - ease * 1.15));
-        } else {
-          const cardOpacity = 1 - dissolve;
-          card.style.opacity = String(cardOpacity);
-          card.style.visibility = cardOpacity <= 0.01 ? 'hidden' : 'visible';
-        }
+    if (!canvas || !data || reducedMotionRef.current) {
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    const dpr = canvas.width / data.width;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, data.width, data.height);
+
+    if (dissolve > 0 || drift > 0) {
+      for (const p of data.list) {
+        const particleDissolve = clamp(dissolve - p.delay * 0.12, 0, 1);
+        const driftEased = drift * drift;
+
+        if (particleDissolve <= 0 && drift <= 0) continue;
+
+        const wobble = Math.sin(ease * p.wobbleSpeed * 4 + p.wobble) * driftEased * 6;
+        const x = p.ox + p.vx * DRIFT * driftEased + wobble;
+        const y = p.oy + p.vy * DRIFT * driftEased + driftEased * driftEased * 18;
+
+        const alpha =
+          drift <= 0
+            ? particleDissolve * p.baseAlpha
+            : p.baseAlpha * (1 - driftEased * 0.97);
+
+        if (alpha <= 0.006) continue;
+
+        const grain = p.size * (1 - driftEased * 0.4);
+        ctx.fillStyle = `rgba(${p.r}, ${p.g}, ${p.b}, ${alpha})`;
+        ctx.fillRect(x - grain * 0.5, y - grain * 0.5, grain, grain);
       }
-
-      if (!canvas || !data || reducedMotionRef.current) {
-        rafRef.current = requestAnimationFrame(tick);
-        return;
-      }
-
-      const ctx = canvas.getContext('2d');
-      const dpr = canvas.width / data.width;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, data.width, data.height);
-
-      if (dissolve > 0 || drift > 0) {
-        for (const p of data.list) {
-          const particleDissolve = clamp(dissolve - p.delay * 0.12, 0, 1);
-          const driftEased = drift * drift;
-
-          if (particleDissolve <= 0 && drift <= 0) continue;
-
-          const wobble = Math.sin(ease * p.wobbleSpeed * 4 + p.wobble) * driftEased * 6;
-          const x = p.ox + p.vx * DRIFT * driftEased + wobble;
-          const y = p.oy + p.vy * DRIFT * driftEased + driftEased * driftEased * 18;
-
-          const alpha =
-            drift <= 0
-              ? particleDissolve * p.baseAlpha
-              : p.baseAlpha * (1 - driftEased * 0.97);
-
-          if (alpha <= 0.006) continue;
-
-          const grain = p.size * (1 - driftEased * 0.4);
-          ctx.fillStyle = `rgba(${p.r}, ${p.g}, ${p.b}, ${alpha})`;
-          ctx.fillRect(x - grain * 0.5, y - grain * 0.5, grain, grain);
-        }
-      }
-
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [diveRef]);
+    }
+  });
 
   return (
     <div className="hero-scatter">
