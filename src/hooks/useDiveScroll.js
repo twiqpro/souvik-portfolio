@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { mapScrollProgress } from '../utils/scrollProgress';
 
 /**
  * Scroll wheel / touch drives 0→1 progress — no vertical page scroll.
@@ -6,7 +7,11 @@ import { useEffect, useRef } from 'react';
  * @returns {React.MutableRefObject<{ target: number, current: number }>}
  */
 export function useDiveScroll({ sensitivity = 0.0028, max = 1 } = {}) {
-  const dive = useRef({ target: 0, current: 0 });
+  const dive = useRef({
+    target: 0,
+    current: 0,
+    mapped: mapScrollProgress(0),
+  });
   const touchY = useRef(null);
 
   useEffect(() => {

@@ -4,8 +4,8 @@ import { getCameraDiveState } from '../utils/cameraDive';
 import { useAnimationFrame } from '../hooks/useAnimationFrame';
 
 const GLSLHills = ({
-  width = '100vw',
-  height = '100vh',
+  width = '100%',
+  height = '100%',
   cameraZ = 125,
   cameraZEnd = 8,
   planeSize = 256,

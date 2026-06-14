@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { tunnelFragmentShader, tunnelVertexShader } from '../shaders/tunnel';
 import { mapScrollProgress } from '../utils/scrollProgress';
+import { useAnimationFrame } from '../hooks/useAnimationFrame';
 
 const SCROLL_KEYS = [
   'dive',
@@ -13,6 +14,7 @@ const SCROLL_KEYS = [
   'section3',
   'section3Content',
   'section3Phase',
+  'section3TunnelPhase',
   'section4',
   'section4Content',
   'section4Phase',
@@ -20,11 +22,27 @@ const SCROLL_KEYS = [
   'tunnelProgress',
 ];
 
-function createTunnelContext(canvas, width, height, vertexShader, fragmentShader) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+function getViewportSize() {
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  };
+}
+
+function syncRendererSize(renderer, material, width, height) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   renderer.setPixelRatio(dpr);
-  renderer.setSize(width, height);
+  renderer.setSize(width, height, false);
+  material.uniforms.iResolution.value.set(
+    Math.round(width * dpr),
+    Math.round(height * dpr),
+    1,
+  );
+}
+
+function createTunnelContext(canvas, width, height, vertexShader, fragmentShader) {
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setClearColor(0x000000, 1);
 
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -42,6 +60,8 @@ function createTunnelContext(canvas, width, height, vertexShader, fragmentShader
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
 
+  syncRendererSize(renderer, material, width, height);
+
   return { renderer, scene, camera, material, mesh, geometry };
 }
 
@@ -54,17 +74,6 @@ function disposeTunnelContext(ctx) {
 
 /**
  * Full-bleed tunnel shader; iTime is driven by scroll (not free-running time).
- *
- * @param {object} props
- * @param {React.MutableRefObject<{ current: number }>|null} props.diveRef
- * @param {string} [props.className]
- * @param {string} [props.canvasClassName]
- * @param {keyof ReturnType<typeof mapScrollProgress>} [props.scrollKey='section2']
- * @param {number} [props.scrollTime=14] — virtual seconds mapped across scrollKey 0→1
- * @param {number} [props.speedMultiplier=0.5] — extra uniform time scale (future sections)
- * @param {string} [props.vertexShader]
- * @param {string} [props.fragmentShader]
- * @param {keyof ReturnType<typeof mapScrollProgress>} [props.visibilityKey] — skip WebGL when low
  */
 function TunnelBackground({
   diveRef = null,
@@ -81,15 +90,22 @@ function TunnelBackground({
   const ctxRef = useRef(null);
   const pausedRef = useRef(false);
   const rafResizeRef = useRef(false);
+  const diveRefStable = useRef(diveRef);
+  diveRefStable.current = diveRef;
 
   const renderFrame = useCallback(() => {
     const ctx = ctxRef.current;
     if (!ctx || pausedRef.current) return;
 
-    const progress = diveRef?.current?.current ?? 0;
-    const mapped = diveRef?.current?.mapped ?? mapScrollProgress(progress);
+    const dive = diveRefStable.current;
+    const progress = dive?.current?.current ?? 0;
+    const mapped = dive?.current?.mapped ?? mapScrollProgress(progress);
     const visibility = mapped[visibilityKey] ?? 0;
-    if (visibility < 0.02) return;
+
+    if (visibility < 0.02) {
+      ctx.renderer.clear(true);
+      return;
+    }
 
     const scrollChannel = SCROLL_KEYS.includes(scrollKey)
       ? mapped[scrollKey]
@@ -101,33 +117,37 @@ function TunnelBackground({
       : scrollChannel * scrollTime * speedMultiplier;
 
     ctx.renderer.render(ctx.scene, ctx.camera);
-  }, [diveRef, scrollKey, scrollTime, speedMultiplier, visibilityKey]);
+  }, [scrollKey, scrollTime, speedMultiplier, visibilityKey]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const container = canvas?.parentElement;
-    if (!canvas || !container) return undefined;
+    if (!canvas) return undefined;
 
-    const width = container.clientWidth || window.innerWidth;
-    const height = container.clientHeight || window.innerHeight;
+    const { width, height } = getViewportSize();
     const ctx = createTunnelContext(canvas, width, height, vertexShader, fragmentShader);
     ctxRef.current = ctx;
+
+    const resize = () => {
+      if (!ctxRef.current) return;
+      const next = getViewportSize();
+      syncRendererSize(
+        ctxRef.current.renderer,
+        ctxRef.current.material,
+        next.width,
+        next.height,
+      );
+    };
 
     const resizeObserver = new ResizeObserver(() => {
       if (!ctxRef.current || rafResizeRef.current) return;
       rafResizeRef.current = true;
       requestAnimationFrame(() => {
         rafResizeRef.current = false;
-        const c = canvas.parentElement;
-        if (!c || !ctxRef.current) return;
-        const w = c.clientWidth;
-        const h = c.clientHeight;
-        ctxRef.current.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-        ctxRef.current.renderer.setSize(w, h);
-        ctxRef.current.material.uniforms.iResolution.value.set(w, h, 1);
+        resize();
       });
     });
-    resizeObserver.observe(container);
+    resizeObserver.observe(document.documentElement);
+    window.addEventListener('resize', resize);
 
     const onVisibility = () => {
       pausedRef.current = document.hidden;
@@ -135,23 +155,18 @@ function TunnelBackground({
     document.addEventListener('visibilitychange', onVisibility);
     onVisibility();
 
-    let frameId = 0;
-    const loop = () => {
-      frameId = requestAnimationFrame(loop);
-      renderFrame();
-    };
-    frameId = requestAnimationFrame(loop);
-
     return () => {
-      cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
+      window.removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', onVisibility);
       if (ctxRef.current) {
         disposeTunnelContext(ctxRef.current);
         ctxRef.current = null;
       }
     };
-  }, [renderFrame, vertexShader, fragmentShader]);
+  }, [vertexShader, fragmentShader]);
+
+  useAnimationFrame(renderFrame);
 
   return (
     <div className={className} aria-hidden="true">

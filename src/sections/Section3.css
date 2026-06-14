@@ -4,8 +4,7 @@
   z-index: 6;
   width: 100%;
   height: 100dvh;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   pointer-events: none;
 }
 
@@ -14,27 +13,34 @@
 }
 
 .section-3__bg {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--void-black);
   opacity: var(--section3, 0);
   will-change: opacity;
 }
 
 .section-3__bg--tunnel {
-  position: absolute;
+  position: fixed;
   inset: 0;
 }
 
 .section-3__bg .section-3__canvas {
   display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   background: var(--void-black);
 }
 
 .section-3__scrim {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   opacity: calc(var(--section3, 0) * 0.5);
   background:

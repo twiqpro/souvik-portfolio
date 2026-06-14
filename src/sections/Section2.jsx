@@ -15,7 +15,7 @@ function Section2({ active = false, diveRef = null }) {
       <TunnelBackground
         diveRef={diveRef}
         className="section-2__bg section-2__bg--tunnel"
-        scrollKey="tunnelProgress"
+        scrollKey="section2TunnelPhase"
         visibilityKey="section2"
         scrollTime={16}
         speedMultiplier={0.2}

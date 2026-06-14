@@ -26,6 +26,7 @@ html {
   --section4-content: 0;
   --tunnel-progress: 0;
   --forward-progress: 0;
+  overflow-x: clip;
 }
 
 html,

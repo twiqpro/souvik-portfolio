@@ -54,6 +54,9 @@ export function mapScrollProgress(progress) {
 
   const tunnelProgress = clamp01((p - TUNNEL_P_START) / TUNNEL_P_SPAN);
   const section2TunnelPhase = clamp01(tunnelProgress / TUNNEL_SECTION2_END);
+  const section3TunnelPhase = clamp01(
+    (tunnelProgress - TUNNEL_SECTION2_END) / Math.max(1e-6, 1 - TUNNEL_SECTION2_END),
+  );
 
   const forwardProgress = clamp01((p - TUNNEL_P_START) / (1 - TUNNEL_P_START));
 
@@ -78,6 +81,7 @@ export function mapScrollProgress(progress) {
     section2Phase,
     section2StackPhase,
     section2TunnelPhase,
+    section3TunnelPhase,
     section3,
     section3Content,
     section3Phase,

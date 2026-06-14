@@ -17,7 +17,7 @@ function Section3({ active = false, diveRef = null }) {
         diveRef={diveRef}
         className="section-3__bg section-3__bg--tunnel"
         canvasClassName="section-3__canvas"
-        scrollKey="tunnelProgress"
+        scrollKey="section3TunnelPhase"
         visibilityKey="section3"
         scrollTime={16}
         speedMultiplier={0.2}
