@@ -5,6 +5,7 @@ import { TunnelCardGallery } from './components/TunnelCardGallery';
 import { Section2 } from './sections/Section2';
 import { Section3 } from './sections/Section3';
 import { Section4 } from './sections/Section4';
+import { Section5 } from './sections/Section5';
 import { useDiveScroll } from './hooks/useDiveScroll';
 import { useScrollFrame } from './hooks/useScrollFrame';
 import { mapScrollProgress, SCROLL_RANGE } from './utils/scrollProgress';
@@ -18,9 +19,11 @@ function App() {
   const [section2Active, setSection2Active] = useState(false);
   const [section3Active, setSection3Active] = useState(false);
   const [section4Active, setSection4Active] = useState(false);
+  const [section5Active, setSection5Active] = useState(false);
   const section2ActiveRef = useRef(false);
   const section3ActiveRef = useRef(false);
   const section4ActiveRef = useRef(false);
+  const section5ActiveRef = useRef(false);
 
   const handleScrollFrame = useCallback((dt) => {
     const { target, current } = dive.current;
@@ -37,6 +40,8 @@ function App() {
     document.documentElement.style.setProperty('--section3-content', String(mapped.section3Content));
     document.documentElement.style.setProperty('--section4', String(mapped.section4));
     document.documentElement.style.setProperty('--section4-content', String(mapped.section4Content));
+    document.documentElement.style.setProperty('--section5', String(mapped.section5));
+    document.documentElement.style.setProperty('--section5-content', String(mapped.section5Content));
     document.documentElement.style.setProperty('--tunnel-progress', String(mapped.tunnelProgress));
     document.documentElement.style.setProperty('--forward-progress', String(mapped.forwardProgress));
 
@@ -57,17 +62,25 @@ function App() {
       section4ActiveRef.current = nextS4;
       setSection4Active(nextS4);
     }
+
+    const nextS5 = mapped.section5 > 0.02;
+    if (nextS5 !== section5ActiveRef.current) {
+      section5ActiveRef.current = nextS5;
+      setSection5Active(nextS5);
+    }
   }, [dive]);
 
   useScrollFrame(handleScrollFrame);
 
-  const scrollHint = section4Active
-    ? 'Scroll · explore case studies'
-    : section3Active
-      ? 'Scroll to continue'
-      : section2Active
+  const scrollHint = section5Active
+    ? 'Scroll · read testimonials'
+    : section4Active
+      ? 'Scroll · explore case studies'
+      : section3Active
         ? 'Scroll to continue'
-        : 'Scroll to enter';
+        : section2Active
+          ? 'Scroll to continue'
+          : 'Scroll to enter';
 
   return (
     <div className="app">
@@ -100,6 +113,7 @@ function App() {
       </div>
 
       <Section4 active={section4Active} />
+      <Section5 active={section5Active} />
 
       <div className="dive-vignette" aria-hidden="true" />
     </div>
