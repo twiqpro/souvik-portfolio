@@ -203,15 +203,17 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
 
       const mapped = diveRefStable.current?.current?.mapped;
       const visibility = getTunnelVisibility(mapped);
+      const section3Exit = mapped?.section3Exit ?? 0;
+      const exitFade = clamp01(1 - section3Exit * 1.15);
       const tunnelProgress = mapped?.tunnelProgress ?? 0;
       const stackPhase = getStackProgress(tunnelProgress);
       const scrollForce = (tunnelProgress - lastPhaseRef.current) * 80;
       lastPhaseRef.current = tunnelProgress;
 
-      container.style.opacity = String(visibility);
-      container.style.visibility = visibility < 0.02 ? 'hidden' : 'visible';
+      container.style.opacity = String(visibility * exitFade);
+      container.style.visibility = visibility * exitFade < 0.02 ? 'hidden' : 'visible';
 
-      if (!activeRef.current || visibility < 0.02) {
+      if (!activeRef.current || visibility * exitFade < 0.02) {
         renderer.render(scene, camera);
         return;
       }
@@ -243,7 +245,7 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
         if (!texture?.image) return;
 
         const normalizedPosition = plane.z / DEPTH_RANGE;
-        const opacity = getOpacityForPosition(normalizedPosition) * visibility;
+        const opacity = getOpacityForPosition(normalizedPosition) * visibility * exitFade;
         const blur = reducedMotion ? 0 : getBlurForPosition(normalizedPosition);
 
         material.uniforms.map.value = texture;

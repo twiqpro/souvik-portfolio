@@ -6,7 +6,6 @@
   height: 100dvh;
   overflow: hidden;
   pointer-events: none;
-  background: var(--void-black);
 }
 
 .section-5--active {
@@ -21,8 +20,16 @@
   opacity: var(--section5, 0);
   overflow: hidden;
   background: var(--void-black);
-  will-change: opacity;
+  transform: scale(calc(1.45 - var(--section5, 0) * 0.45));
+  clip-path: circle(calc(var(--section5, 0) * 150% + 2%) at 50% 50%);
+  will-change: opacity, transform, clip-path;
   pointer-events: none;
+}
+
+.section-5__bg .dotted-surface {
+  transform: scale(calc(1.2 - var(--section5, 0) * 0.2));
+  filter: blur(calc((1 - var(--section5, 0)) * 14px));
+  will-change: transform, filter;
 }
 
 .section-5__scrim {
@@ -50,8 +57,11 @@
   padding: clamp(1.5rem, 4vh, 2.5rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 2vh, 1.5rem);
   overflow: hidden;
   opacity: var(--section5, 0);
-  transform: translateY(calc((1 - var(--section5-content, 0)) * 12px));
-  will-change: opacity, transform;
+  transform:
+    translateY(calc((1 - var(--section5-content, 0)) * 12px))
+    scale(calc(0.88 + var(--section5-content, 0) * 0.12));
+  filter: blur(calc((1 - var(--section5-content, 0)) * 6px));
+  will-change: opacity, transform, filter;
   pointer-events: none;
 }
 
@@ -66,7 +76,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .section-5__overlay {
+  .section-5__overlay,
+  .section-5__bg,
+  .section-5__bg .dotted-surface {
     transform: none;
+    filter: none;
+    clip-path: none;
   }
 }

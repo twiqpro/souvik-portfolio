@@ -28,9 +28,20 @@ export const SECTION4_FADE_OUT = 0.08;
 export const SECTION5_P_START = 0.86;
 export const SECTION5_FADE_IN = 0.12;
 
+/** S3 → S4 handoff — drives vortex exit + burst entrance. */
+export const SECTION3_TO4_START = SECTION4_P_START;
+export const SECTION3_TO4_SPAN = 0.14;
+
+/** Normalized scroll where Section 4 case studies are fully settled (post vortex). */
+export const SECTION4_SETTLED_P = SECTION3_TO4_START + SECTION3_TO4_SPAN + 0.01;
+
+/** S4 → S5 handoff — drives vortex exit + burst entrance. */
+export const SECTION4_TO5_START = SECTION5_P_START;
+export const SECTION4_TO5_SPAN = 0.14;
+
 /** Wheel progress value that lands in Section 4 (uses existing scroll smoothing). */
 export function getSection4ScrollTarget() {
-  return SECTION4_P_START * SCROLL_RANGE;
+  return SECTION4_SETTLED_P * SCROLL_RANGE;
 }
 
 /** Tunnel scroll spans S2 + S3 (drives backgrounds + card stack). */
@@ -61,6 +72,9 @@ export function mapScrollProgress(progress) {
   const section4 = Math.min(section4In, section4Out);
 
   const section5 = clamp01((p - SECTION5_P_START) / SECTION5_FADE_IN);
+
+  const section3Exit = clamp01((p - SECTION3_TO4_START) / SECTION3_TO4_SPAN);
+  const section4Exit = clamp01((p - SECTION4_TO5_START) / SECTION4_TO5_SPAN);
 
   const tunnelProgress = clamp01((p - TUNNEL_P_START) / TUNNEL_P_SPAN);
   const section2TunnelPhase = clamp01(tunnelProgress / TUNNEL_SECTION2_END);
@@ -104,6 +118,8 @@ export function mapScrollProgress(progress) {
     section5,
     section5Content,
     section5Phase,
+    section3Exit,
+    section4Exit,
     tunnelProgress,
     forwardProgress,
   };

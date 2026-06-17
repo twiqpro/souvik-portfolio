@@ -121,13 +121,14 @@ class WebGLRenderer {
 
     program.resolution = gl.getUniformLocation(program, 'resolution');
     program.time = gl.getUniformLocation(program, 'time');
+    program.exit = gl.getUniformLocation(program, 'exit');
     program.move = gl.getUniformLocation(program, 'move');
     program.touch = gl.getUniformLocation(program, 'touch');
     program.pointerCount = gl.getUniformLocation(program, 'pointerCount');
     program.pointers = gl.getUniformLocation(program, 'pointers');
   }
 
-  render(now = 0) {
+  render(now = 0, exit = 0) {
     const { gl, program } = this;
 
     if (!program || gl.getProgramParameter(program, gl.DELETE_STATUS)) return;
@@ -139,6 +140,7 @@ class WebGLRenderer {
 
     gl.uniform2f(program.resolution, this.canvas.width, this.canvas.height);
     gl.uniform1f(program.time, now * 1e-3);
+    if (program.exit) gl.uniform1f(program.exit, exit);
     gl.uniform2f(program.move, ...this.mouseMove);
     gl.uniform2f(program.touch, ...this.mouseCoords);
     gl.uniform1i(program.pointerCount, this.nbrOfPointers);
@@ -216,11 +218,13 @@ class PointerHandler {
 /**
  * WebGL shader background for Section 4.
  */
-function Section4ShaderBackground({ active = false }) {
+function Section4ShaderBackground({ active = false, diveRef = null }) {
   const canvasRef = useRef(null);
   const activeRef = useRef(active);
+  const diveRefStable = useRef(diveRef);
   const loopControlRef = useRef(null);
   activeRef.current = active;
+  diveRefStable.current = diveRef;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -258,11 +262,16 @@ function Section4ShaderBackground({ active = false }) {
       renderer.updatePointerCoords(pointers.coords);
       renderer.updateMove(pointers.move);
 
+      const mapped = diveRefStable.current?.current?.mapped;
+      const section3Exit = mapped?.section3Exit ?? 0;
+      const section4Exit = mapped?.section4Exit ?? 0;
+      const shaderWarp = Math.max(section3Exit, section4Exit);
+
       if (reducedMotion) {
-        renderer.render(frozenTime);
+        renderer.render(frozenTime, shaderWarp);
       } else {
         frozenTime = now;
-        renderer.render(now);
+        renderer.render(now, shaderWarp);
       }
     };
 

@@ -10,6 +10,7 @@ precision highp float;
 out vec4 O;
 uniform vec2 resolution;
 uniform float time;
+uniform float exit;
 #define FC gl_FragCoord.xy
 #define T time
 #define R resolution
@@ -49,6 +50,11 @@ float clouds(vec2 p) {
 }
 void main(void) {
 	vec2 uv=(FC-.5*R)/MN,st=uv*vec2(2,1);
+	float ex=exit*exit;
+	float dist=length(uv);
+	float pull=1.+ex*3.5/max(dist,.08);
+	st*=pull;
+	st+=uv*ex*sin(dist*22.-T*9.)*.18;
 	vec3 col=vec3(0);
 	float bg=clouds(vec2(st.x+T*.5,-st.y));
 	uv*=1.-.3*(sin(T*.2)*.5+.5);
@@ -61,5 +67,8 @@ void main(void) {
 		col+=.002*b/length(max(p,vec2(b*p.x*.02,p.y)));
 		col=mix(col,vec3(bg*.25,bg*.137,bg*.05),d);
 	}
-	O=vec4(col,1);
+	float flash=smoothstep(.55,1.,exit)*ex;
+	col=mix(col,vec3(1.),flash*.55);
+	col*=1.-ex*.35;
+	O=vec4(col,1.);
 }`;

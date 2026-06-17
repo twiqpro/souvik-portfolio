@@ -16,8 +16,11 @@
 .section-4__bg {
   position: fixed;
   inset: 0;
-  opacity: max(0, calc(var(--section4, 0) - var(--section5, 0)));
-  will-change: opacity;
+  opacity: max(0, calc(var(--section4, 0) - var(--section5, 0) * 0.35));
+  transform: scale(calc(1.45 - var(--section4, 0) * 0.45 + var(--section4-exit, 0) * 0.35));
+  clip-path: circle(calc(var(--section4, 0) * 150% + 2%) at 50% 50%);
+  filter: blur(calc(var(--section4-exit, 0) * 6px + (1 - var(--section4, 0)) * 10px));
+  will-change: opacity, transform, filter, clip-path;
   pointer-events: none;
 }
 
@@ -36,8 +39,10 @@
   text-align: center;
   color: var(--pure-white);
   text-shadow: 0 2px 28px rgba(0, 0, 0, 0.9), 0 0 48px rgba(0, 0, 0, 0.65);
-  opacity: max(0, calc(var(--section4, 0) - var(--section5, 0)));
-  will-change: opacity;
+  opacity: max(0, calc(var(--section4, 0) - var(--section5, 0) * 0.2));
+  transform: scale(calc(0.88 + var(--section4-content, 0) * 0.12 - var(--section4-exit, 0) * 0.08));
+  filter: blur(calc((1 - var(--section4-content, 0)) * 6px));
+  will-change: opacity, transform, filter;
   pointer-events: none;
 }
 
@@ -50,6 +55,7 @@
   width: 100%;
   display: flex;
   justify-content: center;
+  perspective: 900px;
 }
 
 .section-4__statement {
@@ -65,9 +71,14 @@
   line-height: 1.15;
   letter-spacing: -0.02em;
   text-align: center;
-  opacity: 1;
-  transform: translateY(calc((1 - var(--section4-content, 0)) * 8px));
-  will-change: transform;
+  opacity: calc(1 - var(--section4-exit, 0) * 1.1);
+  transform:
+    translateY(calc((1 - var(--section4-content, 0)) * 8px))
+    scale(calc(1 - var(--section4-exit, 0) * 0.55))
+    rotateX(calc(var(--section4-exit, 0) * 52deg));
+  filter: blur(calc(var(--section4-exit, 0) * 5px));
+  transform-origin: center top;
+  will-change: transform, opacity, filter;
 }
 
 .section-4__statement-line {
@@ -82,6 +93,12 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  clip-path: inset(
+    calc(var(--section4-exit, 0) * 48%)
+    calc(var(--section4-exit, 0) * 12%)
+    calc(var(--section4-exit, 0) * 48%)
+    calc(var(--section4-exit, 0) * 12%)
+  );
 }
 
 .section-4__cases {
@@ -94,15 +111,17 @@
   max-height: 100%;
   margin-top: 0;
   overflow: hidden;
+  perspective: 1400px;
+  perspective-origin: 50% 42%;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .section-4__bg,
-  .section-4__overlay {
+  .section-4__overlay,
+  .section-4__statement,
+  .section-4__statement-line {
     transform: none;
-  }
-
-  .section-4__statement {
-    transform: none;
+    filter: none;
+    clip-path: none;
   }
 }

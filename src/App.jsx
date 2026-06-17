@@ -6,6 +6,7 @@ import { Section2 } from './sections/Section2';
 import { Section3 } from './sections/Section3';
 import { Section4 } from './sections/Section4';
 import { Section5 } from './sections/Section5';
+import { SectionVortexTransition } from './components/SectionVortexTransition';
 import { useDiveScroll } from './hooks/useDiveScroll';
 import { useScrollFrame } from './hooks/useScrollFrame';
 import { mapScrollProgress, SCROLL_RANGE } from './utils/scrollProgress';
@@ -20,10 +21,12 @@ function App() {
   const [section3Active, setSection3Active] = useState(false);
   const [section4Active, setSection4Active] = useState(false);
   const [section5Active, setSection5Active] = useState(false);
+  const [tunnelActive, setTunnelActive] = useState(false);
   const section2ActiveRef = useRef(false);
   const section3ActiveRef = useRef(false);
   const section4ActiveRef = useRef(false);
   const section5ActiveRef = useRef(false);
+  const tunnelActiveRef = useRef(false);
 
   const handleScrollFrame = useCallback((dt) => {
     const { target, current } = dive.current;
@@ -42,6 +45,8 @@ function App() {
     document.documentElement.style.setProperty('--section4-content', String(mapped.section4Content));
     document.documentElement.style.setProperty('--section5', String(mapped.section5));
     document.documentElement.style.setProperty('--section5-content', String(mapped.section5Content));
+    document.documentElement.style.setProperty('--section3-exit', String(mapped.section3Exit));
+    document.documentElement.style.setProperty('--section4-exit', String(mapped.section4Exit));
     document.documentElement.style.setProperty('--tunnel-progress', String(mapped.tunnelProgress));
     document.documentElement.style.setProperty('--forward-progress', String(mapped.forwardProgress));
 
@@ -67,6 +72,13 @@ function App() {
     if (nextS5 !== section5ActiveRef.current) {
       section5ActiveRef.current = nextS5;
       setSection5Active(nextS5);
+    }
+
+    const nextTunnel =
+      mapped.section2 > 0.08 || mapped.section3 > 0.08 || mapped.section3Exit > 0.02;
+    if (nextTunnel !== tunnelActiveRef.current) {
+      tunnelActiveRef.current = nextTunnel;
+      setTunnelActive(nextTunnel);
     }
   }, [dive]);
 
@@ -105,14 +117,16 @@ function App() {
       <Section2 active={section2Active} diveRef={dive} />
       <Section3 active={section3Active} diveRef={dive} />
 
-      <div className="tunnel-card-stack" aria-hidden={!(section2Active || section3Active)}>
+      <div className="tunnel-card-stack" aria-hidden={!tunnelActive}>
         <TunnelCardGallery
           diveRef={dive}
-          active={section2Active || section3Active}
+          active={tunnelActive}
         />
       </div>
 
-      <Section4 active={section4Active} />
+      <SectionVortexTransition exitVar="section3-exit" zIndex={6.5} />
+      <Section4 active={section4Active} diveRef={dive} />
+      <SectionVortexTransition exitVar="section4-exit" zIndex={7.5} />
       <Section5 active={section5Active} />
 
       <div className="dive-vignette" aria-hidden="true" />

@@ -5,7 +5,7 @@ import './Section4.css';
 /**
  * Section 4 — shader background + case studies.
  */
-function Section4({ active = false }) {
+function Section4({ active = false, diveRef = null }) {
   return (
     <section
       id="section-4"
@@ -14,7 +14,7 @@ function Section4({ active = false }) {
       aria-hidden={!active}
     >
       <div className="section-4__bg" aria-hidden="true">
-        <Section4ShaderBackground active={active} />
+        <Section4ShaderBackground active={active} diveRef={diveRef} />
       </div>
 
       <div className="section-4__overlay">

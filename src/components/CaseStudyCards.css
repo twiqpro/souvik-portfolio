@@ -19,7 +19,10 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-  transform: translateY(calc((1 - var(--section4-content, 0)) * 12px));
+  transform:
+    translateY(calc((1 - var(--section4-content, 0)) * 12px))
+    scale(calc(1 - var(--section4-exit, 0) * 0.15));
+  transform-style: preserve-3d;
   will-change: transform;
 }
 
@@ -29,7 +32,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  max-height: 100%;
+  max-height: 928px;
   max-width: min(78vw, 420px);
   border-radius: clamp(16px, 4vw, 24px);
   border: none;
@@ -38,10 +41,36 @@
   text-decoration: none;
   scroll-snap-align: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
-  opacity: max(0, calc(var(--section4-content, 0) - var(--card-index, 0) * 0.06));
-  transform: translateY(calc((1 - var(--section4-content, 0)) * 20px));
+  opacity: max(
+    0,
+    calc(
+      (var(--section4-content, 0) - var(--card-index, 0) * 0.06)
+      * (1 - var(--section4-exit, 0) * 1.15)
+    )
+  );
+  transform:
+    translateY(calc((1 - var(--section4-content, 0)) * 20px))
+    translate3d(
+      calc(sin((var(--card-index, 0) - 1) * 72deg) * var(--section4-exit, 0) * 95vw),
+      calc(
+        cos((var(--card-index, 0) - 1) * 72deg) * var(--section4-exit, 0) * -95vh
+        + var(--section4-exit, 0) * var(--card-index, 0) * 8px
+      ),
+      calc(var(--section4-exit, 0) * -900px)
+    )
+    rotateZ(calc(
+      (var(--card-index, 0) - 1) * var(--section4-exit, 0) * 72deg
+      + var(--section4-exit, 0) * 180deg
+    ))
+    rotateY(calc((var(--card-index, 0) - 1) * var(--section4-exit, 0) * 55deg))
+    scale(calc(1 - var(--section4-exit, 0) * 0.88));
+  filter:
+    blur(calc(var(--section4-exit, 0) * 10px))
+    brightness(calc(1 + var(--section4-exit, 0) * 1.8))
+    saturate(calc(1 + var(--section4-exit, 0) * 0.6));
   transition: box-shadow 0.25s ease;
-  will-change: opacity, transform;
+  transform-style: preserve-3d;
+  will-change: opacity, transform, filter;
 }
 
 .case-study-card:hover {
@@ -78,6 +107,7 @@
   .case-study-cards__row,
   .case-study-card {
     transform: none;
+    filter: none;
   }
 
   .case-study-card {
