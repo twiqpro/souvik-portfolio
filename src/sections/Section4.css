@@ -71,6 +71,7 @@
   line-height: 1.15;
   letter-spacing: -0.02em;
   text-align: center;
+  text-shadow: none;
   opacity: calc(1 - var(--section4-exit, 0) * 1.1);
   transform:
     translateY(calc((1 - var(--section4-content, 0)) * 8px))
@@ -93,6 +94,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  text-shadow: none;
   clip-path: inset(
     calc(var(--section4-exit, 0) * 48%)
     calc(var(--section4-exit, 0) * 12%)
