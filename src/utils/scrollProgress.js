@@ -32,8 +32,11 @@ export const SECTION5_FADE_IN = 0.12;
 export const SECTION3_TO4_START = SECTION4_P_START;
 export const SECTION3_TO4_SPAN = 0.14;
 
-/** Normalized scroll where Section 4 case studies are fully settled (post vortex). */
-export const SECTION4_SETTLED_P = SECTION3_TO4_START + SECTION3_TO4_SPAN + 0.01;
+/**
+ * Case Studies button target — S4 fully visible, before S5 fade or S4 exit vortex.
+ * (Must stay below SECTION5_P_START; the old post-vortex target overlapped S5.)
+ */
+export const SECTION4_SETTLED_P = SECTION5_P_START - 0.02;
 
 /** S4 → S5 handoff — drives vortex exit + burst entrance. */
 export const SECTION4_TO5_START = SECTION5_P_START;

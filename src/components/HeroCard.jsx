@@ -69,7 +69,12 @@ function HeroCard({ diveRef = null }) {
               <img src="/bits-pilani.png" alt="" className="hero-card__bits-logo" width={16} height={16} />
               <span>BITS Pilani</span>
             </div>
-            <a href="/resume.pdf" className="hero-card__meta-item hero-card__resume">
+            <a
+              href="https://docs.google.com/document/d/1LenrWIkxONW-z2gl5WxpPZShoxfFwWBFuqwMVxC1lDI/edit?tab=t.0"
+              className="hero-card__meta-item hero-card__resume"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <BriefcaseIcon />
               <span>Resume</span>
               <span className="hero-card__external" aria-hidden="true">
