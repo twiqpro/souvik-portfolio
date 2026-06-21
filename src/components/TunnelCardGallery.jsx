@@ -4,13 +4,14 @@ import { GALLERY_IMAGES, GALLERY_IMAGE_COUNT } from '../data/galleryImages';
 import { createClothCardMaterial } from '../shaders/clothCard';
 import './TunnelCardGallery.css';
 
-const VISIBLE_COUNT = 8;
+const MAX_VISIBLE_COUNT = 9;
 const DEPTH_RANGE = 50;
 const MAX_HORIZONTAL_OFFSET = 6;
 const MAX_VERTICAL_OFFSET = 4;
 const STACK_HOLD = 0.08;
 const PLANE_BASE_SCALE = 2.05;
 const CAMERA_FOV = 68;
+const VISUAL_SLOT_ORDER = [3, 1, 2, 0, 8, 7, 6, 5, 4];
 
 const FADE_SETTINGS = {
   fadeIn: { start: 0.05, end: 0.22 },
@@ -115,6 +116,21 @@ function buildSpatialPositions(count) {
   return positions;
 }
 
+function getInitialImageIndexForPlane(planeIndex, visibleCount) {
+  const visualOrder =
+    visibleCount === VISUAL_SLOT_ORDER.length
+      ? VISUAL_SLOT_ORDER
+      : Array.from({ length: visibleCount }, (_, i) => i);
+
+  const imageIndex = visualOrder.indexOf(planeIndex);
+  return imageIndex === -1 ? planeIndex % GALLERY_IMAGE_COUNT : imageIndex % GALLERY_IMAGE_COUNT;
+}
+
+function getImageIndexForCycle(planeIndex, visibleCount, cycleIndex) {
+  const initialIndex = getInitialImageIndexForPlane(planeIndex, visibleCount);
+  return (initialIndex + cycleIndex * visibleCount) % GALLERY_IMAGE_COUNT;
+}
+
 /**
  * Scroll-driven 3D image gallery for Sections 2 & 3.
  */
@@ -134,14 +150,15 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
     if (!container || !canvas) return undefined;
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const spatialPositions = buildSpatialPositions(VISIBLE_COUNT);
+    const visibleCount = Math.min(MAX_VISIBLE_COUNT, GALLERY_IMAGE_COUNT);
+    const spatialPositions = buildSpatialPositions(visibleCount);
     const halfRange = DEPTH_RANGE / 2;
-    const imageAdvance = 1;
+    const depthStep = DEPTH_RANGE / visibleCount;
 
-    const planesData = Array.from({ length: VISIBLE_COUNT }, (_, i) => ({
+    const planesData = Array.from({ length: visibleCount }, (_, i) => ({
       index: i,
-      z: ((DEPTH_RANGE / VISIBLE_COUNT) * i) % DEPTH_RANGE,
-      imageIndex: i % GALLERY_IMAGE_COUNT,
+      z: (depthStep * i) % DEPTH_RANGE,
+      imageIndex: getInitialImageIndexForPlane(i, visibleCount),
       x: spatialPositions[i].x,
       y: spatialPositions[i].y,
     }));
@@ -170,7 +187,7 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
       return texture;
     });
 
-    const materials = Array.from({ length: VISIBLE_COUNT }, () => {
+    const materials = Array.from({ length: visibleCount }, () => {
       const config = createClothCardMaterial();
       return new THREE.ShaderMaterial(config);
     });
@@ -218,7 +235,7 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
         return;
       }
 
-      const scrollOffset = stackPhase * DEPTH_RANGE * (GALLERY_IMAGE_COUNT / VISIBLE_COUNT);
+      const scrollOffset = stackPhase * DEPTH_RANGE * (GALLERY_IMAGE_COUNT / visibleCount);
       const time = clock.getElapsedTime();
 
       materials.forEach((material) => {
@@ -229,15 +246,13 @@ function TunnelCardGallery({ diveRef = null, active = false }) {
       planesData.forEach((plane, i) => {
         const mesh = meshes[i];
         const material = materials[i];
-        const baseZ = (DEPTH_RANGE / VISIBLE_COUNT) * i;
+        const baseZ = depthStep * i;
         const totalZ = baseZ + scrollOffset;
         const newZ = ((totalZ % DEPTH_RANGE) + DEPTH_RANGE) % DEPTH_RANGE;
-        const cycles = Math.floor(totalZ / DEPTH_RANGE);
+        const cycleIndex = Math.floor(totalZ / DEPTH_RANGE);
 
         plane.z = newZ;
-        plane.imageIndex =
-          ((i + cycles * imageAdvance) % GALLERY_IMAGE_COUNT + GALLERY_IMAGE_COUNT)
-          % GALLERY_IMAGE_COUNT;
+        plane.imageIndex = getImageIndexForCycle(i, visibleCount, cycleIndex);
         plane.x = spatialPositions[i].x;
         plane.y = spatialPositions[i].y;
 

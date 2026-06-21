@@ -1,5 +1,4 @@
 import { TunnelBackground } from '../components/TunnelBackground';
-import { tunnelSection3FragmentShader, tunnelSection3VertexShader } from '../shaders/tunnelSection3';
 import './Section3.css';
 
 /**
@@ -21,8 +20,6 @@ function Section3({ active = false, diveRef = null }) {
         visibilityKey="section3"
         scrollTime={16}
         speedMultiplier={0.2}
-        fragmentShader={tunnelSection3FragmentShader}
-        vertexShader={tunnelSection3VertexShader}
       />
       <div className="section-3__scrim" aria-hidden="true" />
 
