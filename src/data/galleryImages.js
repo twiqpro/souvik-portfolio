@@ -8,7 +8,6 @@ export const GALLERY_IMAGES = [
   '/section-2/work-crm.png',
   '/section-2/work-nifty-chart.png',
   '/section-2/work-curated.png',
-  '/section-2/work-twiq.png',
 ];
 
 export const GALLERY_IMAGE_COUNT = GALLERY_IMAGES.length;

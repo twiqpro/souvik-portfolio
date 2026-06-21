@@ -11,7 +11,10 @@ const MAX_VERTICAL_OFFSET = 4;
 const STACK_HOLD = 0.08;
 const PLANE_BASE_SCALE = 2.05;
 const CAMERA_FOV = 68;
-const VISUAL_SLOT_ORDER = [3, 1, 2, 0, 8, 7, 6, 5, 4];
+const VISUAL_SLOT_ORDER_BY_COUNT = {
+  8: [3, 1, 2, 0, 7, 6, 5, 4],
+  9: [3, 1, 2, 0, 8, 7, 6, 5, 4],
+};
 
 const FADE_SETTINGS = {
   fadeIn: { start: 0.05, end: 0.22 },
@@ -118,9 +121,8 @@ function buildSpatialPositions(count) {
 
 function getInitialImageIndexForPlane(planeIndex, visibleCount) {
   const visualOrder =
-    visibleCount === VISUAL_SLOT_ORDER.length
-      ? VISUAL_SLOT_ORDER
-      : Array.from({ length: visibleCount }, (_, i) => i);
+    VISUAL_SLOT_ORDER_BY_COUNT[visibleCount]
+      ?? Array.from({ length: visibleCount }, (_, i) => i);
 
   const imageIndex = visualOrder.indexOf(planeIndex);
   return imageIndex === -1 ? planeIndex % GALLERY_IMAGE_COUNT : imageIndex % GALLERY_IMAGE_COUNT;
